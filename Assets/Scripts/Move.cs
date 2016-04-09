@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿#define NEW_VERSION
+using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+#if NEW_VERSION
 using UnityEngine.SceneManagement;
+#endif
 
 public class Move : MonoBehaviour {
 
@@ -33,7 +36,9 @@ public class Move : MonoBehaviour {
         audioSource = GetComponent<AudioSource>();
         isCaptured = false;
         y = player.position.y;
+#if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "1.Terrain and audio" || SceneManager.GetActiveScene().name == "2.Navigation") moveSpeed = 25f;
+#endif
     }
 
     void FixedUpdate()
@@ -75,6 +80,7 @@ public class Move : MonoBehaviour {
 
     void Moving(float v)
     {
+#if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "1.Terrain and audio" || SceneManager.GetActiveScene().name == "2.Navigation")
         {
             // X축, Z축 방향의 속도
@@ -95,6 +101,7 @@ public class Move : MonoBehaviour {
         }
         else
         {
+#endif
             // X축, Z축 방향의 속도
             if (!isRunning)                 // 걸을 때
             {
@@ -112,8 +119,9 @@ public class Move : MonoBehaviour {
 
             // 이동, 충돌 감지
             collisionFlags = character.Move(movement*Time.fixedDeltaTime);
+#if NEW_VERSION
         }
-        
+#endif        
     }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {

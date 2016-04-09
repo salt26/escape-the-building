@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿#define NEW_VERSION
+using UnityEngine;
 using System.Collections;
+#if NEW_VERSION
 using UnityEngine.SceneManagement;
+#endif
 
 public class AutoMove : MonoBehaviour {
 
@@ -25,6 +28,7 @@ public class AutoMove : MonoBehaviour {
         NavMeshHit navhit;
         RaycastHit rayHit;
         agent.SetDestination(target.position+new Vector3(0f, 0.2f, 0f));
+#if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "2.Navigation")
         {
             if (!agent.Raycast(target.position, out navhit))
@@ -35,6 +39,7 @@ public class AutoMove : MonoBehaviour {
         }
         else if (SceneManager.GetActiveScene().name != "1.Terrain and audio")
         {
+#endif
             if(!Physics.Raycast(GetComponent<Transform>().position, target.position - GetComponent<Transform>().position, out rayHit)) return;
             else if(rayHit.collider.name != "Player"){ // 주인공을 목격하지 못하면 걷는다.
                 agent.speed = walkingSpeed;
@@ -59,7 +64,9 @@ public class AutoMove : MonoBehaviour {
                     PlayFootStepAudio(true);
                 }
             }
+#if NEW_VERSION
         }
+#endif
 	}
 
     void PlayFootStepAudio(bool isRunning)

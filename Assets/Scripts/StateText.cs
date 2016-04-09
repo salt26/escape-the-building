@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿#define NEW_VERSION
+using UnityEngine;
 using UnityEngine.UI;
+#if NEW_VERSION
 using UnityEngine.SceneManagement;
+#endif
 using System.Collections;
 
 public class StateText : MonoBehaviour {
@@ -11,13 +14,17 @@ public class StateText : MonoBehaviour {
 	void Start () {
         stxt = this;
         text = GetComponent<Text>();
+#if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "3.Modeling")
         {
+#endif
             text.text = "당신을 쫓아오는 캡슐을 피해 어두운 건물 안에서 생존하시오.";
             return;
+#if NEW_VERSION
         }
         if (SceneManager.GetActiveScene().name != "1.Terrain and Audio") text.text = "움직이는 캡슐을 피해 ";
         text.text += Manager.manager.speakers.Length + "개의 서로 다른 음악을 재생하는 스피커를 찾아가시오.";
+#endif
 	}
 
     public void PleaseRestart()

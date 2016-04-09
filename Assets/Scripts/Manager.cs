@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿#define NEW_VERSION
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
+#if NEW_VERSION
 using UnityEngine.SceneManagement;
+#endif
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -97,8 +100,11 @@ public class Manager : MonoBehaviour {
 
     public void RestartGame()
     {
-        //DontDestroyOnLoad(GameObject.Find("Directional Light"));
+#if NEW_VERSION
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+#else
+		Application.LoadLevel ("3.Modeling");
+#endif
     }
 
     public void QuitGame()
