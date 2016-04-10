@@ -24,11 +24,13 @@ public class Door : MonoBehaviour {
     Transform capsule;
     Transform thisDoor;
     NavMeshObstacle obstacle;
+    KeyInventory keyInventory;
 
     void Start()
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
         capsule = GameObject.Find("Capsule").GetComponent<Transform>();
+        keyInventory = GameObject.Find("Player").GetComponent<KeyInventory>();
         thisDoor = GetComponent<Transform>();
         obstacle = GetComponent<NavMeshObstacle>();
         obstacle.enabled = false;
@@ -38,6 +40,21 @@ public class Door : MonoBehaviour {
 		if (isLocked) {
 			Close (1000f);
 			if(!obstacle.enabled) obstacle.enabled = true; // 잠긴 문은 추적자가 장애물로 인식
+
+            // 잠긴 문을 열려고 시도
+            if (Input.GetKey(KeyCode.Space) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f))
+            {
+                // 주인공이 문을 여는 동안 대기하는 시간 구현하기
+                KeyInInventory key = keyInventory.FindByTargetDoorID(doorID);
+                if (key == null)
+                {
+                    Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
+                    return;
+                }
+                Unlock();
+                key.UseKey();
+
+            }
 		}
         if (Input.GetKey(KeyCode.Space) && isSameFloor(player.position,thisDoor.position) && isNearEnough(player.position,thisDoor.position,5f) && !isLocked)
         {
@@ -65,6 +82,7 @@ public class Door : MonoBehaviour {
 
     void Open(float forceAmount)
     {
+        // 열릴 때 사운드 재생
         GetComponent<Rigidbody>().AddForce(GetComponent<Transform>().forward * forceAmount, ForceMode.Acceleration);
     }
 
@@ -97,5 +115,6 @@ public class Door : MonoBehaviour {
 	public void Unlock(){
 		isLocked = false;
 		obstacle.enabled = false;
+        Debug.Log("Success to open"); // 여는 데에 성공하면 주는 피드백 구현하기
 	}
 }

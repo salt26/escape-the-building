@@ -34,9 +34,9 @@ public class Head : MonoBehaviour {
         if (!((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.LeftArrow))
             && !((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.RightArrow)) && turningAngle != 0f)
         {
-            if (Mathf.Abs(turningAngle) < 3f) turningAngle = 0f;
-            else if (turningAngle < 0f) turningAngle += 4f;
-            else if (turningAngle > 0f) turningAngle -= 4f;
+            if (Mathf.Abs(turningAngle) < 2f) turningAngle = 0f;
+            else if (turningAngle < 0f) turningAngle += 3f;
+            else if (turningAngle > 0f) turningAngle -= 3f;
         }
 
         sight.transform.localRotation = Quaternion.Euler(new Vector3(0f, turningAngle, 0f));

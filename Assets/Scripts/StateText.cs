@@ -18,7 +18,7 @@ public class StateText : MonoBehaviour {
         if (SceneManager.GetActiveScene().name == "3.Modeling")
         {
 #endif
-            text.text = "당신을 쫓아오는 캡슐을 피해 어두운 건물 안에서 생존하시오.";
+            text.text = "당신을 쫓아오는 캡슐을 피해 건물 어딘가에 있는 열쇠를 찾고 탈출하시오.";
             return;
 #if NEW_VERSION
         }

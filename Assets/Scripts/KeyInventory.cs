@@ -2,27 +2,31 @@
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// 열쇠 보관함의 클래스입니다. 주운 후의 열쇠의 List를 가지고 있습니다.
+/// </summary>
 public class KeyInventory : MonoBehaviour {
 
-	[HideInInspector] public List<Key> keyInventory = new List<Key>();
+	public List<KeyInInventory> keyInventory = new List<KeyInInventory>();
 
-    public Key FindByID(int ID)
+    public KeyInInventory FindByID(int ID)
     {
-        for (int i = 0; i < keyInventory.Count; i++)
+        foreach (KeyInInventory key in keyInventory)
         {
-            if (ID == keyInventory[i].GetKeyID())
+            if (ID == key.GetKeyID())
             {
-                return keyInventory[i];
+                return key;
             }
         }
         return null;
     }
-    public Key FindByTargetDoorID(int target) {
-        for (int i = 0; i < keyInventory.Count; i++)
+    public KeyInInventory FindByTargetDoorID(int target, bool findThatIsNotUsed = true) {
+        foreach (KeyInInventory key in keyInventory)
         {
-            if (target == keyInventory[i].GetTargetDoorID())
+            //if (findThatIsNotUsed && key.GetIsUsed()) continue;
+            if (target == key.GetTargetDoorID())
             {
-                return keyInventory[i];
+                return key;
             }
         }
         return null;
