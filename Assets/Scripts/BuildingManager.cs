@@ -14,7 +14,7 @@ public class BuildingManager : MonoBehaviour {
     List<Location> RoomLocations = new List<Location>();
     List<Door> AllDoors = new List<Door>();
 
-    KeyInventory inventory;
+    //KeyInventory inventory;
 
     void Awake()
     {
@@ -23,7 +23,7 @@ public class BuildingManager : MonoBehaviour {
 
     void Start()
     {
-        inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
+        //inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
 
         foreach (GameObject locationObject in Locations)
         {
@@ -32,6 +32,8 @@ public class BuildingManager : MonoBehaviour {
             AllLocations.Add(location);
             if (location.GetLocationType() == 1) RoomLocations.Add(location);
         }
+
+        RoomLocations.Remove(FindLocationByID(1118)); // 주인공 시작 지점 바로 앞에 열쇠가 생성되는 것 방지
 
         if (RoomLocations.Count < Keys.Count) // 비둘기집 원리
         {
@@ -42,7 +44,7 @@ public class BuildingManager : MonoBehaviour {
             foreach (GameObject key in Keys)
             {
                 Location selectedLocation = RoomLocations[Random.Range(0, RoomLocations.Count)];
-                GameObject gameObject = (GameObject)Instantiate(key, selectedLocation.GetPosition(), Quaternion.identity);
+                GameObject gameObject = (GameObject)Instantiate(key, selectedLocation.GetPosition() - new Vector3(0f, 1f, 0f), Quaternion.identity);
                 gameObject.GetComponent<Key>().SetKeyID(selectedLocation.GetLocationID());
                 RoomLocations.Remove(selectedLocation); // 비복원추출, RoomLocations는 일회용
 
@@ -59,24 +61,12 @@ public class BuildingManager : MonoBehaviour {
         KeyText.ktxt.SetInitialKeyNumber(Keys.Count);
     }
 
-    public int NumberOfUsedKey()
+    public Location FindLocationByID(int ID)
     {
-        int num = 0;
-        foreach (KeyInInventory key in inventory.keyInventory)
+        foreach (Location loc in AllLocations)
         {
-            if (key.GetIsUsed()) num++;
+            if (loc.GetLocationID() == ID) return loc;
         }
-        return num;
+        return null;
     }
-
-    public int NumberOfNotUsedKey()
-    {
-        int num = 0;
-        foreach (KeyInInventory key in inventory.keyInventory)
-        {
-            if (!key.GetIsUsed()) num++;
-        }
-        return num;
-    }
-	
 }

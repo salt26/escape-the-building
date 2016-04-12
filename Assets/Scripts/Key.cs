@@ -19,15 +19,10 @@ public class Key : MonoBehaviour {
      * 열쇠의 고유번호는 열쇠가 건물에 놓일 때 놓인 지점의 고유번호와 같게 설정됩니다.
      */
 
-	[SerializeField] bool typeIsEntrance; // 열쇠가 출입문 열쇠이면 true, 방 문 열쇠이면 false
+	[SerializeField] bool isEntranceType; // 열쇠가 출입문 열쇠이면 true, 방 문 열쇠이면 false
     [SerializeField] int targetDoorID; // 이 열쇠로 열 수 있는 문의 고유번호
 
     int keyID; // 열쇠의 고유번호
-    /* 
-     * 지점이 구현된 후 [SerializeField] 빼고 SetKeyID() 사용하기
-     */
-
-    
 
     Transform player;
     Transform thisKey;
@@ -46,6 +41,8 @@ public class Key : MonoBehaviour {
         if (isNearEnough(player.position, thisKey.position, 1f) && isSameFloor(player.position, thisKey.position))
         {
             Debug.Log("Pick key up"); // 열쇠를 주웠을 때 주는 피드백 구현하기
+            if (isEntranceType) NoticeText.ntxt.NoticePickEntranceKeyUp();
+            else NoticeText.ntxt.NoticePickRoomKeyUp();
             PickUp();
         }
     }
@@ -83,12 +80,12 @@ public class Key : MonoBehaviour {
 	/// 열쇠의 종류가 출입문 열쇠이면 true 반환, 방 문 열쇠이면 false 반환
 	/// </summary>
 	public bool GetKeyType(){
-		return typeIsEntrance;
+		return isEntranceType;
 	}
 
 	// 열쇠를 주우면 열쇠 보관함에 이 열쇠의 데이터를 저장하고 이 객체는 사라짐
 	public void PickUp(){
-        inventory.keyInventory.Add(new KeyInInventory(keyID, typeIsEntrance, targetDoorID));
+        inventory.keyInventory.Add(new KeyInInventory(keyID, isEntranceType, targetDoorID));
         Destroy(gameObject);
 	}
 }
@@ -98,7 +95,7 @@ public class Key : MonoBehaviour {
 /// </summary>
 public class KeyInInventory
 {
-    bool typeIsEntrance; // 열쇠가 출입문 열쇠이면 true, 방 문 열쇠이면 false
+    bool isEntranceType; // 열쇠가 출입문 열쇠이면 true, 방 문 열쇠이면 false
     int keyID; // 열쇠의 고유번호
     int targetDoorID; // 이 열쇠로 열 수 있는 문의 고유번호
     bool isUsed; // 열쇠 사용 여부
@@ -107,7 +104,7 @@ public class KeyInInventory
     public KeyInInventory(int ID, bool type, int target)
     {
         keyID = ID;
-        typeIsEntrance = type;
+        isEntranceType = type;
         targetDoorID = target;
         isUsed = false;
     }
@@ -127,7 +124,7 @@ public class KeyInInventory
     /// </summary>
     public bool GetKeyType()
     {
-        return typeIsEntrance;
+        return isEntranceType;
     }
 
     public bool GetIsUsed()

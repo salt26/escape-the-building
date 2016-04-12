@@ -27,7 +27,10 @@ public class AutoMove : MonoBehaviour {
 	void FixedUpdate () {
         NavMeshHit navhit;
         RaycastHit rayHit;
-        agent.SetDestination(target.position+new Vector3(0f, 0.2f, 0f));
+        if (!Escape.escape.GetHasEscaped())
+        {
+            agent.SetDestination(target.position + new Vector3(0f, 0.2f, 0f));
+        }
 #if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "2.Navigation")
         {

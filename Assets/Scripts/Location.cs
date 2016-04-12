@@ -12,9 +12,12 @@ public class Location : MonoBehaviour {
 
     Transform location;
 
-    void Start()
+    void Awake()
     {
         location = GetComponent<Transform>();
+    }
+    void Start()
+    {
         GetComponent<MeshRenderer>().enabled = false;
     }
 

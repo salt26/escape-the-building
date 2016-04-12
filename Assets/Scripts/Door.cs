@@ -16,7 +16,7 @@ public class Door : MonoBehaviour {
      * 문이 있는 방 안의 지점의 고유번호와 문의 고유번호는 일치합니다.
      */
 
-	[SerializeField] bool typeIsEntrance; // 문이 출입문이면 true, 방 문이면 false
+	[SerializeField] bool isEntranceType; // 문이 출입문이면 true, 방 문이면 false
 	[SerializeField] int doorID; // 문의 고유번호
 	[SerializeField] bool isLocked; // 잠김 여부
 
@@ -24,13 +24,13 @@ public class Door : MonoBehaviour {
     Transform capsule;
     Transform thisDoor;
     NavMeshObstacle obstacle;
-    KeyInventory keyInventory;
+    KeyInventory inventory;
 
     void Start()
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
         capsule = GameObject.Find("Capsule").GetComponent<Transform>();
-        keyInventory = GameObject.Find("Player").GetComponent<KeyInventory>();
+        inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
         thisDoor = GetComponent<Transform>();
         obstacle = GetComponent<NavMeshObstacle>();
         obstacle.enabled = false;
@@ -44,11 +44,24 @@ public class Door : MonoBehaviour {
             // 잠긴 문을 열려고 시도
             if (Input.GetKey(KeyCode.Space) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f))
             {
+                bool haveNoKey = false;
+
+                if (inventory.NumberOfNotUsedKey(isEntranceType) == 0)
+                {
+                    NoticeText.ntxt.NoticeLockedDoor();
+                    haveNoKey = true;
+                }
+
                 // 주인공이 문을 여는 동안 대기하는 시간 구현하기
-                KeyInInventory key = keyInventory.FindByTargetDoorID(doorID);
+
+                KeyInInventory key = inventory.FindByTargetDoorID(doorID);
                 if (key == null)
                 {
-                    Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
+                    if (!haveNoKey)
+                    {
+                        Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
+                        NoticeText.ntxt.NoticeFailedToUnlock();
+                    }
                     return;
                 }
                 Unlock();
@@ -101,7 +114,7 @@ public class Door : MonoBehaviour {
 	/// 문의 종류가 출입문이면 true 반환, 방 문이면 false 반환
 	/// </summary>
 	public bool GetDoorType(){
-		return typeIsEntrance;
+		return isEntranceType;
 	}
 
 	/// <summary>
@@ -116,5 +129,6 @@ public class Door : MonoBehaviour {
 		isLocked = false;
 		obstacle.enabled = false;
         Debug.Log("Success to open"); // 여는 데에 성공하면 주는 피드백 구현하기
+        NoticeText.ntxt.NoticeSuccessedToUnlock();
 	}
 }
