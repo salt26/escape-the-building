@@ -72,7 +72,7 @@ public class Location : MonoBehaviour {
             return;
         }
 #endif
-        if (other.name == "Capsule" && other.gameObject.GetComponent<Patrol>().GetTempLocation() != this)
+        if (this.GetLocationType() <= 3 && other.name == "Capsule" && other.gameObject.GetComponent<Patrol>().GetTempLocation() != this)
         {
             Debug.Log(this.GetLocationID());
             other.gameObject.GetComponent<Patrol>().SetTempLocation(this);

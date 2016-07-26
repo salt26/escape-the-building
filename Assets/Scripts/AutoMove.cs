@@ -19,6 +19,8 @@ public class AutoMove : MonoBehaviour {
     public float runningSpeed;
     public AudioClip[] footstepSounds;
 
+    [HideInInspector] public bool isRunning; // isRunning이 true라는 것은 주인공을 목격했다는 뜻이다.
+
     float moveDistance;
     NavMeshAgent agent;
     AudioSource audioSource;
@@ -27,6 +29,7 @@ public class AutoMove : MonoBehaviour {
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponentInChildren<AudioSource>();
         moveDistance = 0f;
+        isRunning = false;
 	}
 	
 	void FixedUpdate () {
@@ -56,8 +59,16 @@ public class AutoMove : MonoBehaviour {
         else if (SceneManager.GetActiveScene().name != "1.Terrain and audio")
         {
 #endif
-            if(!Physics.Raycast(GetComponent<Transform>().position, target.position - GetComponent<Transform>().position, out rayHit)) return;
-            else if(rayHit.collider.name != "Player"){ // 주인공을 목격하지 못하면 걷는다.
+            if (!Physics.Raycast(GetComponent<Transform>().position, target.position - GetComponent<Transform>().position, out rayHit))
+            {
+                // 이런 경우는 없다고 가정해도 좋다
+                Debug.LogError("Raycast Failed");
+                isRunning = false;
+                return;
+            }
+            else if (rayHit.collider.name != "Player") // 주인공을 목격하지 못하면(소리로 감지했어도) 걷는다.
+            { 
+                isRunning = false;
                 agent.speed = walkingSpeed;
                 if (agent.velocity.magnitude > 0f)
                 {
@@ -70,6 +81,8 @@ public class AutoMove : MonoBehaviour {
                 }
                 return;
             }
+            // 주인공을 목격하면 뛴다.
+            isRunning = true;
             agent.speed = runningSpeed;
             if (agent.velocity.magnitude > 0f)
             {

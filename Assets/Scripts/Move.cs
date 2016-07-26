@@ -114,7 +114,7 @@ public class Move : MonoBehaviour {
             if (v < 0f) movement /= 2f;     // 뒷걸음질 칠 때
 
             // Y축 아래 방향으로 중력 작용
-            if(character.isGrounded) movement += Physics.gravity * Time.fixedDeltaTime;
+            if (character.isGrounded) movement += Physics.gravity * Time.fixedDeltaTime;
             else movement += Physics.gravity * 100f * Time.fixedDeltaTime;
 
             // 이동, 충돌 감지
@@ -145,8 +145,8 @@ public class Move : MonoBehaviour {
         {
             return;
         }
-        if (isRunning) audioSource.volume = 0.8f;
-        else audioSource.volume = 0.56f;
+        if (isRunning) audioSource.volume = 0.5f;
+        else audioSource.volume = 0.35f;
 
         // 0번째 소리를 제외한 나머지 중에서 랜덤하게 하나를 선택하여 재생
         int n = Random.Range(1, footstepSounds.Length);
