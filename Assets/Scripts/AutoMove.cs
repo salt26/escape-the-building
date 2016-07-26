@@ -5,6 +5,11 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 #endif
 
+/// <summary>
+/// 추적자(캡슐)의 움직임을 담당하는 클래스
+/// 추적자의 목적지는 이 클래스에서 계산하지 않고,
+/// 목적지를 향해 걷거나 뛰는 행동을 이 클래스에서 담당한다.
+/// </summary>
 public class AutoMove : MonoBehaviour {
 
     public Transform target;
@@ -29,7 +34,15 @@ public class AutoMove : MonoBehaviour {
         RaycastHit rayHit;
         if (!Escape.escape.GetHasEscaped())
         {
-            agent.SetDestination(target.position + new Vector3(0f, 0.2f, 0f));
+#if NEW_VERSION
+            if (SceneManager.GetActiveScene().name == "3.Modeling") {
+                agent.SetDestination(target.position + new Vector3(0f, 0.2f, 0f));
+            } else {
+#endif
+            agent.SetDestination(GetComponent<Patrol>().GetDestPosition());
+#if NEW_VERSION
+            }
+#endif
         }
 #if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "2.Navigation")
