@@ -12,29 +12,29 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class AutoMove : MonoBehaviour {
 
-    public Transform target;
     public float walkingStepDistance;
     public float runningStepDistance;
     public float walkingSpeed;
     public float runningSpeed;
     public AudioClip[] footstepSounds;
 
-    [HideInInspector] public bool isRunning; // isRunning이 true라는 것은 주인공을 목격했다는 뜻이다.
-
     float moveDistance;
+    Transform target;
+    Vector3 targetPosition;
     NavMeshAgent agent;
     AudioSource audioSource;
 
 	void Start () {
+        target = GameObject.Find("Player").GetComponent<Transform>();
+        targetPosition = target.position + new Vector3(0f, 0.25f, 0f);
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponentInChildren<AudioSource>();
         moveDistance = 0f;
-        isRunning = false;
 	}
 	
 	void FixedUpdate () {
+        targetPosition = target.position + new Vector3(0f, 0.25f, 0f);
         NavMeshHit navhit;
-        RaycastHit rayHit;
         if (!Escape.escape.GetHasEscaped())
         {
 #if NEW_VERSION
@@ -59,16 +59,9 @@ public class AutoMove : MonoBehaviour {
         else if (SceneManager.GetActiveScene().name != "1.Terrain and audio")
         {
 #endif
-            if (!Physics.Raycast(GetComponent<Transform>().position, target.position - GetComponent<Transform>().position, out rayHit))
+            
+            if (GetComponent<Patrol>().GetMoveState() % 2 == 0)
             {
-                // 이런 경우는 없다고 가정해도 좋다
-                Debug.LogError("Raycast Failed");
-                isRunning = false;
-                return;
-            }
-            else if (rayHit.collider.name != "Player") // 주인공을 목격하지 못하면(소리로 감지했어도) 걷는다.
-            { 
-                isRunning = false;
                 agent.speed = walkingSpeed;
                 if (agent.velocity.magnitude > 0f)
                 {
@@ -79,20 +72,22 @@ public class AutoMove : MonoBehaviour {
                         PlayFootStepAudio(false);
                     }
                 }
-                return;
             }
-            // 주인공을 목격하면 뛴다.
-            isRunning = true;
-            agent.speed = runningSpeed;
-            if (agent.velocity.magnitude > 0f)
+            // 주인공을 목격하거나 목격했던 상태에서 소리가 들리면 뛴다. /* 나중에 탈진 고려해서 체력 낮으면 뛰지 않고 걷는 기능 만들기 */
+            else
             {
-                moveDistance += runningSpeed * Time.fixedDeltaTime;
-                if (moveDistance > runningStepDistance)
+                agent.speed = runningSpeed;
+                if (agent.velocity.magnitude > 0f)
                 {
-                    moveDistance -= runningStepDistance;
-                    PlayFootStepAudio(true);
+                    moveDistance += runningSpeed * Time.fixedDeltaTime;
+                    if (moveDistance > runningStepDistance)
+                    {
+                        moveDistance -= runningStepDistance;
+                        PlayFootStepAudio(true);
+                    }
                 }
             }
+
 #if NEW_VERSION
         }
 #endif
@@ -111,5 +106,10 @@ public class AutoMove : MonoBehaviour {
         // 방금 재생한 소리를 0번째로 옮겨서 이전과 다른 소리가 재생되게 함
         footstepSounds[n] = footstepSounds[0];
         footstepSounds[0] = audioSource.clip;
+    }
+
+    public Vector3 GetTargetPosition()
+    {
+        return targetPosition;
     }
 }

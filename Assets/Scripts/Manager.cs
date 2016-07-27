@@ -103,7 +103,7 @@ public class Manager : MonoBehaviour {
 #if NEW_VERSION
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 #else
-		Application.LoadLevel ("3.Modeling");
+		Application.LoadLevel ("4.Asset");
 #endif
     }
 
