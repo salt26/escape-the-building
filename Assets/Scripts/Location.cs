@@ -72,10 +72,9 @@ public class Location : MonoBehaviour {
             return;
         }
 #endif
-        if (this.GetLocationType() <= 3 && other.name == "Capsule" && other.gameObject.GetComponent<Patrol>().GetTempLocation() != this)
+        if (this.GetLocationType() <= 3 && other.tag == "Chaser" && other.gameObject.GetComponent<Patrol>().GetTempLocation() != this)
         {
-            //Debug.Log(this.GetLocationID());
-            other.gameObject.GetComponent<Patrol>().SetTempLocation(this);
+            other.GetComponent<Patrol>().SetTempLocation(this);
         }
     }
 }

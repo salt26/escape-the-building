@@ -40,7 +40,7 @@ public class Key : MonoBehaviour {
         GetComponent<Transform>().Rotate(new Vector3(0f, 1f, 0f));
         if (isNearEnough(player.position, thisKey.position, 1f) && isSameFloor(player.position, thisKey.position))
         {
-            Debug.Log("Pick key up"); // 열쇠를 주웠을 때 주는 피드백 구현하기
+            //Debug.Log("Pick key up"); // 열쇠를 주웠을 때 주는 피드백 구현하기
             if (isEntranceType) NoticeText.ntxt.NoticePickEntranceKeyUp();
             else NoticeText.ntxt.NoticePickRoomKeyUp();
             PickUp();

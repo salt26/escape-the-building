@@ -7,8 +7,8 @@ using System.Collections;
 public class Patrol : MonoBehaviour {
 
     public int patrolMode;              // 1이면 복도만(남자1), 2이면 복도와 잠기지 않은 방 전부를(남자2), 3이면 완전 랜덤으로(여자) 순찰함
+    public float hearing = 10f;         // [능력치] 주인공의 발소리를 듣는 능력. 주인공이 뛸 때를 기준으로 주인공을 감지하는 최대 거리.
     public GameObject playerLocation;
-    public GameObject capsuleLocation;
 
     private float stopCount;
     private int moveState;              // 움직이는 상태가 0이면 순찰 중, 1이면 주인공을 목격하여 뛰어감, 2이면 주인공 발소리를 듣고 걸어감,
@@ -17,16 +17,15 @@ public class Patrol : MonoBehaviour {
     private Location destLocation;      // 목적 지점
     private Location passedLocation;    // 이전에 마지막으로 설정되었던 목적 지점
     Vector3 target;
-    Transform capsule;
+    Transform chaser;
 
 	void Start () {
         tempLocation = null;
         destLocation = null;
         passedLocation = null;
-        capsule = GetComponent<Transform>();
+        chaser = GetComponent<Transform>();
         stopCount = 0f;
         moveState = 0;
-        capsuleLocation.GetComponent<Transform>().position = capsule.position;
 	}
 
     void FixedUpdate()
@@ -39,12 +38,23 @@ public class Patrol : MonoBehaviour {
             if (tempLocation != null) Debug.Log("temp = " + tempLocation.GetLocationID());
         }
         RaycastHit rayHit;
-        if (!Physics.Raycast(capsule.position, target - capsule.position, out rayHit))
+        if (!Physics.Raycast(chaser.position, target - chaser.position, out rayHit))
         {
             // 이런 경우는 없다고 가정해도 좋다
             Debug.LogError("Raycast Failed");
             moveState = 0;
-            return;
+        }
+        // 탈진하면
+        else if (GetComponent<AutoMove>().isExhausted)
+        {
+            if (moveState != 0)
+            {
+                moveState = 0;
+                //Debug.Log("Chaser is exhausted");
+            }
+   
+            // 경로 재설정
+            destLocation = null;
         }
         // 주인공을 목격하면
         else if (rayHit.collider.name == "Player")
@@ -60,9 +70,9 @@ public class Patrol : MonoBehaviour {
             destLocation = playerLocation.GetComponent<Location>();
         }
         // 주인공을 목격하지 못했고 주인공의 발소리를 들었다면
-        else if (Move.move.isMoving && isSameFloor(target, capsule.position) &&
-            ((isNearEnough(target, capsule.position, 10f) && Move.move.isRunning) ||
-            (isNearEnough(target, capsule.position, 7f) && !Move.move.isRunning)))     // (음량은 거리에 반비례)
+        else if (Move.move.isMoving && isSameFloor(target, chaser.position) &&
+            ((isNearEnough(target, chaser.position, hearing) && Move.move.isRunning) ||
+            (isNearEnough(target, chaser.position, hearing * 0.7f) && !Move.move.isRunning)))     // (음량은 거리에 반비례)
         {
             if (moveState == 0)
             {
@@ -79,15 +89,15 @@ public class Patrol : MonoBehaviour {
             playerLocation.GetComponent<Transform>().position = target + new Vector3(0f, 0.2f, 0f);
             destLocation = playerLocation.GetComponent<Location>();
         }
-        // 목적 지점에 도달했는데
-        else if (tempLocation == destLocation) {
+        // 목적 지점에 도달했는데 (또는 목적 지점이 없는데)
+        else if (tempLocation == destLocation || destLocation == null) {
             Location nextLocation;
             if (moveState == 0)                                                 // 주인공을 쫓는 중이 아니었다면
             {
                 nextLocation = NextDestLocation(passedLocation, destLocation);  // 다음 목적지 재설정
                 passedLocation = destLocation;
             }
-            else                                                                // 주인공을 쫓다가 놓쳤다면 (또는 목적 지점이 없으면)
+            else                                                                // 주인공을 쫓다가 놓쳤다면
             {
                 moveState = 0;
                 //Debug.Log("moveState = " + moveState);
@@ -106,17 +116,13 @@ public class Patrol : MonoBehaviour {
         stopCount += 3f * Time.fixedDeltaTime;
         //Debug.Log(stopCount);
 
-        /* 체력 시스템 도입하면 탈진 시 경로 재설정하도록 하기 */
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.name != "CapsuleLocation")
-        {
-            stopCount = 0f;
-            //capsuleLocation.GetComponent<Transform>().position = GetComponent<NavMeshAgent>().transform.position; // y값이 떨어지는 이유를 알려줘!
-            //Debug.Log(GetComponent<NavMeshAgent>().transform.position);
-        }
+        // 추적자가 주인공에게 접근했을 때 경고로서 안내 텍스트를 띄워준다. (잡히거나 탈출하면 띄워주지 않음.)
+        if (isSameFloor(target, chaser.position) && (isNearEnough(target, chaser.position, 5f) && !isNearEnough(target, chaser.position, 4.8f)) &&
+            !GetComponent<AutoMove>().isRunning && !GetComponent<AutoMove>().isExhausted && !Escape.escape.GetHasEscaped() && !Move.move.isCaptured)
+            NoticeText.ntxt.NoticeChaserApproachByWalking();
+        else if (isSameFloor(target, chaser.position) && (isNearEnough(target, chaser.position, 7.1f) && !isNearEnough(target, chaser.position, 6.9f)) &&
+            GetComponent<AutoMove>().isRunning && !Escape.escape.GetHasEscaped() && !Move.move.isCaptured)
+            NoticeText.ntxt.NoticeChaserApproachByRunning();
     }
 
     // 같은 층에서 A, B 사이의 거리가 distance보다 가까우면 true 반환
@@ -137,7 +143,7 @@ public class Patrol : MonoBehaviour {
     Location NextDestLocation(Location passed, Location arrived)
     {
         int index, nextIndex;
-        if (patrolMode == 0) Debug.LogError("Capsule's patrolMode is 0");
+        if (patrolMode == 0) Debug.LogError("Chaser's patrolMode is 0");
         if (patrolMode == 1) // 복도만 돌아다님
         {
             if (arrived == null) // 도착 지점이 없는 경우

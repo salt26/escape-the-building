@@ -11,13 +11,17 @@ public class Head : MonoBehaviour {
     public CurveControlledBob motionBob = new CurveControlledBob();
     //public float stepInterval;
 
+    public AudioClip[] breathSounds;
+
     Camera sight;
     float turningAngle; // 정면으로부터 고개(시야)가 회전한 각도
     //bool beforeStepOn; // 발이 땅에 닿기 전까지(머리가 내려오는 중에) true
     float gradient; // 머리 위치의 y값 변화량
+    AudioSource audioSource;
 	
 	void Start () {
         sight = GetComponent<Camera>();
+        audioSource = GetComponent<AudioSource>();
         motionBob.Setup(sight, 1f);
         motionBob.VerticalToHorizontalRatio = 2f;
         turningAngle = 0f;
@@ -72,5 +76,34 @@ public class Head : MonoBehaviour {
             gradient = sight.transform.localPosition.y - oldY;
             if (oldGradient <= 0f && gradient > 0f) Move.move.PlayFootStepAudio();
         }
-	}
+
+        // 체력이 낮으면 숨소리를 낸다.
+        if (Move.move.isExhausted && !audioSource.isPlaying)
+        {
+            PlayBreathAudio(0.85f);
+        }
+        else if (Move.move.GetStamina() / Move.move.maxStamina < 0.25f && Move.move.isRunning && !audioSource.isPlaying)
+        {
+            PlayBreathAudio(0.6f);
+        }
+        else if (((Move.move.GetStamina() / Move.move.maxStamina < 0.5f && Move.move.isRunning) ||
+            (Move.move.GetStamina() / Move.move.maxStamina < 0.25f && !Move.move.isRunning)) && !audioSource.isPlaying)
+        {
+            PlayBreathAudio(0.25f);
+        }
+    }
+
+    public void PlayBreathAudio(float volume)
+    {
+        audioSource.volume = volume;
+
+        // 0번째 소리를 제외한 나머지 중에서 랜덤하게 하나를 선택하여 재생
+        int n = Random.Range(1, breathSounds.Length);
+        audioSource.clip = breathSounds[n];
+        audioSource.PlayOneShot(audioSource.clip);
+
+        // 방금 재생한 소리를 0번째로 옮겨서 이전과 다른 소리가 재생되게 함
+        breathSounds[n] = breathSounds[0];
+        breathSounds[0] = audioSource.clip;
+    }
 }

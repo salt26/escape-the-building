@@ -1,5 +1,6 @@
 ﻿#define NEW_VERSION
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
 #if NEW_VERSION
@@ -12,22 +13,28 @@ public class Move : MonoBehaviour {
 
     public float walkingStepDistance;
     public float runningStepDistance;
-    public float walkingSpeed;
-    public float runningSpeed;
+    public float walkingSpeed;                  // [능력치] 걸을 때의 속도(m/초)
+    public float runningSpeed;                  // [능력치] 뛸 때의 속도(m/초)
     public float turningSpeed;
+    public float maxStamina = 30f;              // [능력치] 최대 체력. 달리기를 지속할 수 있는 시간(초)
     public AudioClip[] footstepSounds;
+    public Image sliderFill;
     [HideInInspector] public float moveSpeed;
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool isRunning;
     [HideInInspector] public bool isCaptured;
+    [HideInInspector] public bool isExhausted;
     [HideInInspector] public CharacterController character;
 
     float y;
+    float stamina;                              // 현재 체력
     Vector3 movement;
     Rigidbody player;
     Camera head;
+    Slider staminaSlider;
     CollisionFlags collisionFlags;
     AudioSource audioSource;
+    Animator gameOverAnim;
     MouseLook mouseLook = new MouseLook();
 
     void Awake()
@@ -35,10 +42,16 @@ public class Move : MonoBehaviour {
         move = this;
         player = GetComponent<Rigidbody>();
         head = GameObject.Find("Head").GetComponent<Camera>();
+        staminaSlider = GameObject.Find("StaminaSlider").GetComponent<Slider>();
         character = GetComponent<CharacterController>();
         audioSource = GetComponent<AudioSource>();
+        gameOverAnim = GameObject.Find("GameOverPanel").GetComponent<Animator>();
         isCaptured = false;
+        isExhausted = false;
         y = player.position.y;
+        stamina = maxStamina;
+        staminaSlider.maxValue = maxStamina;
+        staminaSlider.value = stamina;
         mouseLook.Init(GetComponent<Transform>(), head.transform);
 #if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "1.Terrain and audio" || SceneManager.GetActiveScene().name == "2.Navigation") moveSpeed = 25f;
@@ -60,68 +73,100 @@ public class Move : MonoBehaviour {
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        // 추적자에게 잡히면 이동하거나 회전할 수 없음.
-        if (isCaptured)
-        {
-            h = 0f;
-            v = 0f;
-        }
-
 #if NEW_VERSION
         if (SceneManager.GetActiveScene().name == "1.Terrain and audio" || SceneManager.GetActiveScene().name == "2.Navigation" ||
             SceneManager.GetActiveScene().name == "3.Modeling" || SceneManager.GetActiveScene().name == "4.Asset")
         {
+            // 추적자에게 잡히면 이동하거나 회전할 수 없음.
+            if (isCaptured)
+            {
+                h = 0f;
+                v = 0f;
+            }
+
             // 움직이는지 확인
             if (v != 0f && !isMoving) isMoving = true;
             else if (v == 0f && isMoving) isMoving = false;
-        }
-        else
-        {
-#endif
-            // 움직이는지 확인
-            if ((v != 0f || h != 0f) && !isMoving) isMoving = true;
-            else if ((v == 0f && h == 0f) && isMoving) isMoving = false;
-#if NEW_VERSION
-        }
-#endif
 
-#if NEW_VERSION
-        if (SceneManager.GetActiveScene().name == "1.Terrain and audio" || SceneManager.GetActiveScene().name == "2.Navigation" ||
-            SceneManager.GetActiveScene().name == "3.Modeling" || SceneManager.GetActiveScene().name == "4.Asset")
-        {
             // 달리는지 확인
             if ((isMoving && v > 0f && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))) && !isRunning) isRunning = true;
             else if (!(isMoving && v > 0f && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))) && isRunning) isRunning = false;
-        }
-        else
-        {
-#endif
-            // 달리는지 확인
-            if ((isMoving && v > 0f && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) && !isRunning) isRunning = true;
-            else if (!(isMoving && v > 0f && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) && isRunning) isRunning = false;
-#if NEW_VERSION
-        }
-#endif
 
-        // 이동속도 변환
-        if (isRunning) moveSpeed = runningSpeed;
-        else moveSpeed = walkingSpeed;
+            // 이동속도 변환
+            if (isRunning) moveSpeed = runningSpeed;
+            else moveSpeed = walkingSpeed;
 
-#if NEW_VERSION
-        if (SceneManager.GetActiveScene().name == "1.Terrain and audio" || SceneManager.GetActiveScene().name == "2.Navigation" ||
-            SceneManager.GetActiveScene().name == "3.Modeling" || SceneManager.GetActiveScene().name == "4.Asset")
-        {
             // 몸통 회전
             if (h != 0f && !(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) Turning(h);
 
             // 이동
             Moving(v);
-            return;
+        }
+        else
+        {
+#endif
+            if (stamina <= 0f) StartCoroutine("Exhaustion");
+
+            // 추적자에게 잡히거나 탈진하면 이동할 수 없음.
+            if (isCaptured || isExhausted)
+            {
+                h = 0f;
+                v = 0f;
+            }
+
+            // 움직이는지 확인
+            if ((v != 0f || h != 0f) && !isMoving) isMoving = true;
+            else if (((v == 0f && h == 0f) && isMoving) || isExhausted) isMoving = false;
+
+            // 달리는지 확인
+            if ((isMoving && v > 0f && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) &&
+                !isRunning && stamina / maxStamina > 0.1f) isRunning = true;
+            else if ((!(isMoving && v > 0f && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) &&
+                isRunning) || isExhausted) isRunning = false;
+
+            // 이동속도 변환 및 체력 관리
+            if (isRunning)          // 달릴 때
+            {
+                moveSpeed = runningSpeed;
+                stamina -= Time.fixedDeltaTime;
+            }
+            else if (isMoving)      // 걸을 때
+            {
+                moveSpeed = walkingSpeed;
+                if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.4f;
+                else stamina = maxStamina;
+            }
+            else if (isExhausted)   // 탈진했을 때
+            {
+                moveSpeed = 0f;
+                if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.25f;
+                else stamina = maxStamina;
+            }
+            else if (!isCaptured)   // 정상적으로 멈춰 있을 때
+            {
+                moveSpeed = 0f;
+                if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.8f;
+                else stamina = maxStamina;
+            }
+            staminaSlider.value = stamina;
+            if (stamina / maxStamina >= 0.4f)
+            {
+                sliderFill.color = new Color((stamina / maxStamina) * (-13f / 15f) + (101f / 75f), 1f, 0.48f, 0.75f);
+            }
+            else if(stamina / maxStamina >= 0.1f)
+            {
+                sliderFill.color = new Color(1f, (stamina / maxStamina) * (26f / 15f) + (23f / 75f), 0.48f, 0.75f);
+            }
+            else
+            {
+                sliderFill.color = new Color(1f, (stamina / maxStamina) * 2f + 0.28f, (stamina / maxStamina) * 2f + 0.28f, 0.75f);
+            }
+
+            // 이동
+            Moving(v, h);
+#if NEW_VERSION
         }
 #endif
-
-        // 이동
-        Moving(v, h);
     }
 
     void Turning(float h)
@@ -154,19 +199,13 @@ public class Move : MonoBehaviour {
         {
 #endif
             // X축, Z축 방향의 속도
-            if (!isRunning)                 // 걸을 때
+            if (!isRunning || (isRunning && v > 0f))    // 걷거나 달릴 때
             {
                 movement = GetComponent<Transform>().forward * v + GetComponent<Transform>().right * h;
                 if (movement.magnitude > 1f) movement = movement.normalized;
-                movement *= moveSpeed;
+                movement *= moveSpeed;                  // 속도는 앞에서 변환했음
             }
-            else if (isRunning && v > 0f)  // 달릴 때
-            {
-                movement = GetComponent<Transform>().forward * v + GetComponent<Transform>().right * h;
-                if (movement.magnitude > 1f) movement = movement.normalized;
-                movement *= runningSpeed;
-            }
-            if (v < 0f) movement /= 2f;     // 뒷걸음질 칠 때
+            if (v < 0f) movement /= 2f;                 // 뒷걸음질 칠 때
 
             // Y축 아래 방향으로 중력 작용
             if (character.isGrounded) movement += Physics.gravity * Time.fixedDeltaTime;
@@ -178,6 +217,18 @@ public class Move : MonoBehaviour {
         }
 #endif        
     }
+
+    IEnumerator Exhaustion()
+    {
+        isExhausted = true;
+        stamina = 0f;
+        gameOverAnim.SetTrigger("exhaustion");
+        NoticeText.ntxt.NoticePlayerExhausted();
+        yield return new WaitForSeconds(4f);
+        gameOverAnim.SetTrigger("recoverFromExhaustion");
+        isExhausted = false;
+    }
+
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Rigidbody body = hit.collider.attachedRigidbody;
@@ -216,5 +267,10 @@ public class Move : MonoBehaviour {
     public MouseLook GetMouseLook()
     {
         return mouseLook;
+    }
+
+    public float GetStamina()
+    {
+        return stamina;
     }
 }

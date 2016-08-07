@@ -17,6 +17,7 @@ public class Manager : MonoBehaviour {
     public AudioClip fanfare;
     public GameObject[] speakers;
     public GameObject startPanel;
+    public GameObject[] chasers;    // 여기 등록된 추적자만 공식적으로 사용 가능
     
     bool[] isSpeakerTouched;
     bool isCleared;

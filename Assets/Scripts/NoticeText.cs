@@ -56,12 +56,38 @@ public class NoticeText : MonoBehaviour {
         else if (whichCoroutineStarts == 6 && whichCoroutineWorks != 6)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(6, "으아아아아아아아아아악!"));
+            int r = Random.Range(0, 2);
+            if (r == 0) StartCoroutine(NoticeMessage(6, "으아아아아아아아아아악!"));
+            else if (r == 1) StartCoroutine(NoticeMessage(6, "그들에게 붙잡히고 말았다..."));
         }
         else if (whichCoroutineStarts == 7 && whichCoroutineWorks != 7)
         {
             StopAllCoroutines();
             StartCoroutine(NoticeMessage(7, "밖이 보인다! 탈출이다!"));
+        }
+        else if (whichCoroutineStarts == 8 && whichCoroutineWorks != 8)
+        {
+            StopAllCoroutines();
+            int r = Random.Range(0, 2);
+            if (r == 0) StartCoroutine(NoticeMessage(8, "힘들어 죽을 것 같아."));
+            else if (r == 1) StartCoroutine(NoticeMessage(8, "이대로 쓰러질 수는 없어..."));
+        }
+        else if (whichCoroutineStarts == 9 && whichCoroutineWorks != 9)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(9, "추적자가 쓰러졌다. 어서 도망가자!"));
+        }
+        else if (whichCoroutineStarts == 10 && whichCoroutineWorks != 10)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(10, "쉿, 가까이에 추적자가 있다."));
+        }
+        else if (whichCoroutineStarts == 11 && whichCoroutineWorks != 11)
+        {
+            StopAllCoroutines();
+            int r = Random.Range(0, 2);
+            if (r == 0) StartCoroutine(NoticeMessage(11, "추적자가 바로 앞까지 쫓아왔어!"));
+            else if (r == 1) StartCoroutine(NoticeMessage(11, "앗, 위험하다!"));
         }
 	}
 
@@ -99,6 +125,27 @@ public class NoticeText : MonoBehaviour {
     {
         whichCoroutineStarts = 7;
     }
+
+    public void NoticePlayerExhausted()
+    {
+        whichCoroutineStarts = 8;
+    }
+
+    public void NoticeChaserExhausted()
+    {
+        whichCoroutineStarts = 9;
+    }
+
+    public void NoticeChaserApproachByWalking()
+    {
+        whichCoroutineStarts = 10;
+    }
+
+    public void NoticeChaserApproachByRunning()
+    {
+        whichCoroutineStarts = 11;
+    }
+
     IEnumerator NoticeMessage(int coroutineNumber, string message)
     {
         whichCoroutineStarts = 0;

@@ -21,7 +21,7 @@ public class StateText : MonoBehaviour {
         if (!(SceneManager.GetActiveScene().name == "1.Terrain and Audio" || SceneManager.GetActiveScene().name == "2.Navigation"))
         {
 #endif
-            text.text = "당신을 쫓아오는 캡슐을 피해 건물 어딘가에 있는 열쇠를 찾고 탈출하십시오.";
+            text.text = "당신을 쫓아오는 추적자를 피해 건물 어딘가에 있는 열쇠를 찾고 탈출하십시오.";
             return;
 #if NEW_VERSION
         }
@@ -32,7 +32,7 @@ public class StateText : MonoBehaviour {
 
     public void PleaseRestart()
     {
-        text.text = "캡슐에 부딪혀 움직일 수 없게 되었습니다. \"Restart Game\" 버튼을 누르십시오.";
+        text.text = "추적자에게 잡혔습니다. \"Restart Game\" 버튼을 누르십시오.";
     }
 
     public void SuccessToEscape()

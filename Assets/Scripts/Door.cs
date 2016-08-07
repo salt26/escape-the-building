@@ -21,7 +21,6 @@ public class Door : MonoBehaviour {
 	[SerializeField] bool isLocked; // 잠김 여부
 
 	Transform player;
-    Transform capsule;
     Transform thisDoor;
     NavMeshObstacle obstacle;
     KeyInventory inventory;
@@ -29,7 +28,6 @@ public class Door : MonoBehaviour {
     void Start()
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
-        capsule = GameObject.Find("Capsule").GetComponent<Transform>();
         inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
         thisDoor = GetComponent<Transform>();
         obstacle = GetComponent<NavMeshObstacle>();
@@ -43,7 +41,8 @@ public class Door : MonoBehaviour {
 
             // 잠긴 문을 열려고 시도
             // (v.0.4.1부터 Space키 대신 마우스 좌클릭으로 문을 열게 됨)
-            if (Input.GetMouseButton(0) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f))
+            if (Input.GetMouseButton(0) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f) &&
+                !player.gameObject.GetComponent<Move>().isExhausted && !player.gameObject.GetComponent<Move>().isCaptured)
             {
                 bool haveNoKey = false;
 
@@ -60,7 +59,7 @@ public class Door : MonoBehaviour {
                 {
                     if (!haveNoKey)
                     {
-                        Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
+                        //Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
                         NoticeText.ntxt.NoticeFailedToUnlock();
                     }
                     return;
@@ -70,14 +69,20 @@ public class Door : MonoBehaviour {
 
             }
 		}
-        // v.0.4.1부터 Space키 대신 마우스 좌클릭으로 문을 열게 되었고, 문을 열 수 있는 거리가 5m에서 2m로 감소함
-        if (Input.GetMouseButton(0) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f) && !isLocked)
+        // v.0.4.1부터 Space키 대신 마우스 좌클릭으로 문을 열게 되었고, 문을 열 수 있는 거리가 5m에서 2m로 감소함. 탈진한 상태에서는 열 수 없음
+        if (Input.GetMouseButton(0) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f) &&
+            !isLocked && !player.GetComponent<Move>().isExhausted && !player.GetComponent<Move>().isCaptured)
         {
             Open(10f);
         }
-        if (isSameFloor(capsule.position, thisDoor.position) && isNearEnough(capsule.position, thisDoor.position, 2f) && !isLocked)
+        foreach (GameObject chaser in Manager.manager.chasers)
         {
-            Open(10f);
+            if (isSameFloor(chaser.GetComponent<Transform>().position, thisDoor.position) &&
+                isNearEnough(chaser.GetComponent<Transform>().position, thisDoor.position, chaser.GetComponent<AutoMove>().doorDistance) &&
+            !isLocked && !chaser.GetComponent<AutoMove>().isExhausted)
+            {
+                Open(10f);
+            }
         }
 	}
 
@@ -130,7 +135,7 @@ public class Door : MonoBehaviour {
 	public void Unlock(){
 		isLocked = false;
 		obstacle.enabled = false;
-        Debug.Log("Success to open"); // 여는 데에 성공하면 주는 피드백 구현하기
+        //Debug.Log("Success to open"); // 여는 데에 성공하면 주는 피드백 구현하기
         NoticeText.ntxt.NoticeSuccessedToUnlock();
 	}
 }

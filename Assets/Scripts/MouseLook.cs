@@ -13,7 +13,7 @@ public class MouseLook
     public float smoothTime = 5f;
     public bool lockCursor = true;
 
-
+    private Move player;
     private Quaternion characterTargetRot;
     private Quaternion cameraTargetRot;
     private bool cursorIsLocked = true;
@@ -25,6 +25,7 @@ public class MouseLook
         characterTargetRot = character.localRotation;
         cameraTargetRot = camera.localRotation;
 
+        player = GameObject.Find("Player").GetComponent<Move>();
         turningAngle = 0f;
     }
 
@@ -32,7 +33,7 @@ public class MouseLook
     public void LookRotation(Transform character, Transform camera)
     {
         // 커서가 잠긴 상태에서만 주인공의 몸통 및 머리 회전이 가능함.
-        if (lockCursor && cursorIsLocked)
+        if (lockCursor && cursorIsLocked && !player.isExhausted)
         {
             float yRot = Input.GetAxisRaw("Mouse X") * XSensitivity;
             float xRot = Input.GetAxisRaw("Mouse Y") * YSensitivity;
@@ -58,6 +59,7 @@ public class MouseLook
             }
 
         }
+        //if (player.isExhausted) camera.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
         /*
         // 몸은 가만히 있고 고개(시야)만 돌리는 기능. A(왼쪽 화살표)키 또는 D(오른쪽 화살표)키를 눌러 돌릴 수 있음.
