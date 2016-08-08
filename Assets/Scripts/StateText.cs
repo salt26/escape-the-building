@@ -37,6 +37,6 @@ public class StateText : MonoBehaviour {
 
     public void SuccessToEscape()
     {
-        text.text = "건물을 탈출하는 데 성공했습니다! \"Quit Game\" 버튼을 누르십시오.";
+        text.text = "건물을 탈출하는 데 성공했습니다! [Esc키] + \"Quit Game\" 버튼을 누르십시오.";
     }
 }

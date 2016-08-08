@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MouseLook
 {
-    /* 나중에 마우스 감도를 원하는 값으로 설정할 수 있도록 할 것! */
+    /* TODO : 나중에 마우스 감도를 원하는 값으로 설정할 수 있도록 할 것! */
     public float XSensitivity = 2f;
     public float YSensitivity = 2f;
     public bool clampVerticalRotation = true;
@@ -17,7 +17,7 @@ public class MouseLook
     private Quaternion characterTargetRot;
     private Quaternion cameraTargetRot;
     private bool cursorIsLocked = true;
-    private float turningAngle;
+    //private float turningAngle;
 
     // LookRotation 함수를 사용하기 전에 초기화해주는 함수
     public void Init(Transform character, Transform camera)
@@ -26,7 +26,7 @@ public class MouseLook
         cameraTargetRot = camera.localRotation;
 
         player = GameObject.Find("Player").GetComponent<Move>();
-        turningAngle = 0f;
+        //turningAngle = 0f;
     }
 
     // 커서의 움직임에 따라 주인공의 몸통과 머리를 회전하는 함수
