@@ -20,16 +20,21 @@ public class Door : MonoBehaviour {
 	[SerializeField] int doorID; // 문의 고유번호
 	[SerializeField] bool isLocked; // 잠김 여부
 
+    public AudioClip doorUnlock;
+    public AudioClip doorCreaking;
+
 	Transform player;
     Transform thisDoor;
     NavMeshObstacle obstacle;
     KeyInventory inventory;
+    AudioSource audioSource;
 
     void Start()
     {
         player = GameObject.Find("Player").GetComponent<Transform>();
         inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
         thisDoor = GetComponent<Transform>();
+        audioSource = GetComponent<AudioSource>();
         obstacle = GetComponent<NavMeshObstacle>();
         obstacle.enabled = false;
     }
@@ -74,6 +79,11 @@ public class Door : MonoBehaviour {
             !isLocked && !player.GetComponent<Move>().isExhausted && !player.GetComponent<Move>().isCaptured)
         {
             Open(10f);
+            if (!audioSource.isPlaying)
+            {
+                audioSource.clip = doorCreaking;
+                audioSource.Play();
+            }
         }
         foreach (GameObject chaser in Manager.manager.chasers)
         {
@@ -82,6 +92,11 @@ public class Door : MonoBehaviour {
             !isLocked && !chaser.GetComponent<AutoMove>().isExhausted)
             {
                 Open(10f);
+                if (!audioSource.isPlaying)
+                {
+                    audioSource.clip = doorCreaking;
+                    audioSource.Play();
+                }
             }
         }
 	}
@@ -137,5 +152,7 @@ public class Door : MonoBehaviour {
 		obstacle.enabled = false;
         //Debug.Log("Success to open"); // 여는 데에 성공하면 주는 피드백 구현하기
         NoticeText.ntxt.NoticeSuccessedToUnlock();
+        audioSource.clip = doorUnlock;
+        audioSource.Play();
 	}
 }

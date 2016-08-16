@@ -1,6 +1,7 @@
 ﻿#define NEW_VERSION
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 using System.Collections;
 using System.Linq;
 #if NEW_VERSION
@@ -18,6 +19,7 @@ public class Manager : MonoBehaviour {
     public GameObject[] speakers;
     public GameObject startPanel;
     public GameObject[] chasers;    // 여기 등록된 추적자만 공식적으로 사용 가능
+    public AudioMixer BGMMixer;
     
     bool[] isSpeakerTouched;
     bool isCleared;
@@ -123,10 +125,20 @@ public class Manager : MonoBehaviour {
     public void BGMOn()
     {
         Toggle toggle = GameObject.Find("Toggle").GetComponent<Toggle>();
+        /*
         AudioSource BGM = GameObject.Find("Building1").GetComponent<AudioSource>();
         if ((toggle.isOn && BGM.mute) || (!toggle.isOn && !BGM.mute))
         {
             BGM.mute = !toggle.isOn;
+        }
+        */
+        if (toggle.isOn)
+        {
+            BGMMixer.SetFloat("BGM", 0f);
+        }
+        else
+        {
+            BGMMixer.SetFloat("BGM", -80f);
         }
     }
 

@@ -28,6 +28,7 @@ public class Move : MonoBehaviour {
 
     float y;
     float stamina;                              // 현재 체력
+    int tempZoneID;                             // 주인공이 현재 머물러 있는 AudioZone의 ID
     Vector3 movement;
     Rigidbody player;
     Camera head;
@@ -48,6 +49,7 @@ public class Move : MonoBehaviour {
         gameOverAnim = GameObject.Find("GameOverPanel").GetComponent<Animator>();
         isCaptured = false;
         isExhausted = false;
+        tempZoneID = 0;
         y = player.position.y;
         stamina = maxStamina;
         staminaSlider.maxValue = maxStamina;
@@ -272,5 +274,15 @@ public class Move : MonoBehaviour {
     public float GetStamina()
     {
         return stamina;
+    }
+
+    public int GetTempZoneID()
+    {
+        return tempZoneID;
+    }
+
+    public void SetTempZoneID(int ID)
+    {
+        tempZoneID = ID;
     }
 }

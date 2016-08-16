@@ -10,12 +10,13 @@ public class Patrol : MonoBehaviour {
     public float hearing = 10f;         // [능력치] 주인공의 발소리를 듣는 능력. 주인공이 뛸 때를 기준으로 주인공을 감지하는 최대 거리.
     public GameObject playerLocation;
 
-    private float stopCount;
+    private float seeCount;
     private int moveState;              // 움직이는 상태가 0이면 순찰 중, 1이면 주인공을 목격하여 뛰어감, 2이면 주인공 발소리를 듣고 걸어감,
                                         // 3이면 주인공 발소리를 듣고 뛰어감, 4이면 10초간 아무 명령도 받지 않고 랜덤 지점으로 걸어갔다가 상태가 0으로 바뀜
     private Location tempLocation;      // 최근에 지난 지점(목적 지점으로 설정되지 않았더라도) -> Location.cs에서 설정해 줌
     private Location destLocation;      // 목적 지점
     private Location passedLocation;    // 이전에 마지막으로 설정되었던 목적 지점
+    private int tempZoneID;             // 이 추적자가 현재 머물러 있는 AudioZone의 ID
     Vector3 target;
     Transform chaser;
 
@@ -24,19 +25,22 @@ public class Patrol : MonoBehaviour {
         destLocation = null;
         passedLocation = null;
         chaser = GetComponent<Transform>();
-        stopCount = 0f;
+        seeCount = 0f;
         moveState = 0;
+        tempZoneID = 0;
 	}
 
     void FixedUpdate()
     {
         target = GetComponent<AutoMove>().GetTargetPosition();
+        /*
         if (Input.GetKey(KeyCode.F1))
         {
             if (destLocation != null) Debug.Log("dest = " + destLocation.GetLocationID());
             if (passedLocation != null) Debug.Log("pass = " + passedLocation.GetLocationID());
             if (tempLocation != null) Debug.Log("temp = " + tempLocation.GetLocationID());
         }
+        */
         RaycastHit rayHit;
         if (!Physics.Raycast(chaser.position, target - chaser.position, out rayHit))
         {
@@ -49,6 +53,7 @@ public class Patrol : MonoBehaviour {
         {
             if (moveState != 0)
             {
+                seeCount = 0f;
                 moveState = 0;
                 //Debug.Log("Chaser is exhausted");
             }
@@ -59,28 +64,42 @@ public class Patrol : MonoBehaviour {
         // 주인공을 목격하면
         else if (rayHit.collider.name == "Player")
         {
-            if (moveState != 1)
+            // 버그로 인해 딱 1프레임 동안만 주인공을 보고 돌진하는 경우를 방지
+            if (moveState != 1 && seeCount < 0.2f)
             {
+                seeCount += Time.fixedDeltaTime;
+            }
+            else if (moveState != 1 && seeCount >= 0.2f)
+            {
+                seeCount = 0f;
                 moveState = 1;
                 //Debug.Log("moveState = " + moveState);
             }
 
-            // 기존 목적 지점을 버리고 주인공을 우선적으로 쫓아감
-            playerLocation.GetComponent<Transform>().position = target + new Vector3(0f, 0.2f, 0f);
-            destLocation = playerLocation.GetComponent<Location>();
+            if (moveState == 1)
+            {
+                // 기존 목적 지점을 버리고 주인공을 우선적으로 쫓아감
+                playerLocation.GetComponent<Transform>().position = target + new Vector3(0f, 0.2f, 0f);
+                destLocation = playerLocation.GetComponent<Location>();
+            }
         }
-        // 주인공을 목격하지 못했고 주인공의 발소리를 들었다면
-        else if (Move.move.isMoving && isSameFloor(target, chaser.position) &&
+        // 주인공을 목격하지 못했고 주인공의 발소리를 들었다면 (또는 주인공이 계단에 있고 거리가 가까우면)
+        else if (Move.move.isMoving && (isSameFloor(target, chaser.position) &&
             ((isNearEnough(target, chaser.position, hearing) && Move.move.isRunning) ||
-            (isNearEnough(target, chaser.position, hearing * 0.7f) && !Move.move.isRunning)))     // (음량은 거리에 반비례)
+            (isNearEnough(target, chaser.position, hearing * 0.7f) && !Move.move.isRunning))) ||    // (음량은 거리에 반비례)
+            ((Move.move.GetTempZoneID() / 100) % 10 == 0 &&
+            ((Vector3.Distance(target, chaser.position) < hearing && Move.move.isRunning) ||
+            ((Vector3.Distance(target, chaser.position) < hearing * 0.7f) && !Move.move.isRunning))))
         {
             if (moveState == 0)
             {
+                seeCount = 0f;
                 moveState = 2;      // 순찰 중 -> 듣고 걸어감 
                 //Debug.Log("moveState = " + moveState);
             }
             else if (moveState == 1)
             {
+                seeCount = 0f;
                 moveState = 3; // 목격하고 뛰어감 -> 듣고 뛰어감
                 //Debug.Log("moveState = " + moveState);
             }
@@ -94,17 +113,24 @@ public class Patrol : MonoBehaviour {
             Location nextLocation;
             if (moveState == 0)                                                 // 주인공을 쫓는 중이 아니었다면
             {
+                seeCount = 0f;
                 nextLocation = NextDestLocation(passedLocation, destLocation);  // 다음 목적지 재설정
                 passedLocation = destLocation;
             }
             else                                                                // 주인공을 쫓다가 놓쳤다면
             {
+                seeCount = 0f;
                 moveState = 0;
                 //Debug.Log("moveState = " + moveState);
                 nextLocation = NextDestLocation(passedLocation, null);          // 마지막으로 지난 지점을 기준으로 순찰 경로에 합류
             }
             destLocation = nextLocation;
         }
+        else
+        {
+            seeCount = 0f;
+        }
+
         // 주인공을 쫓는 중이고 새로운 고정 지점을 지나면
         if (moveState != 0 && tempLocation != destLocation && tempLocation != passedLocation)
         {
@@ -113,7 +139,7 @@ public class Patrol : MonoBehaviour {
         }
         
         /* 한 자리에 멈춰서 4초(?) 이상 움직이지 않는 경우 주인공 무시하고 무조건 경로를 재탐색하도록 하기 */
-        stopCount += 3f * Time.fixedDeltaTime;
+        //stopCount += 3f * Time.fixedDeltaTime;
         //Debug.Log(stopCount);
 
         // 추적자가 주인공에게 접근했을 때 경고로서 안내 텍스트를 띄워준다. (잡히거나 탈출하면 띄워주지 않음.)
@@ -123,6 +149,19 @@ public class Patrol : MonoBehaviour {
         else if (isSameFloor(target, chaser.position) && (isNearEnough(target, chaser.position, 7.1f) && !isNearEnough(target, chaser.position, 6.9f)) &&
             GetComponent<AutoMove>().isRunning && !Escape.escape.GetHasEscaped() && !Move.move.isCaptured)
             NoticeText.ntxt.NoticeChaserApproachByRunning();
+
+        // 주인공을 목격한 경우(주인공과 추적자 사이에 장애물이 없는 경우) 발소리에 Lowpass를 적용하지 않는다.
+        if (moveState == 1 && !GetComponentInChildren<Lowpass>().isSeeing)
+        {
+            GetComponentInChildren<Lowpass>().isSeeing = true;
+        }
+        // 주인공과 추적자 사이에 장애물이 있으면 발소리에 Lowpass를 적용한다.
+        else if (moveState != 1 && GetComponentInChildren<Lowpass>().isSeeing)
+        {
+            GetComponentInChildren<Lowpass>().isSeeing = false;
+        }
+
+        //if (rayHit.collider != null) Debug.Log(rayHit.collider.name + " " + moveState);
     }
 
     // 같은 층에서 A, B 사이의 거리가 distance보다 가까우면 true 반환
@@ -244,8 +283,18 @@ public class Patrol : MonoBehaviour {
         return tempLocation;
     }
 
+    public int GetTempZoneID()
+    {
+        return tempZoneID;
+    }
+
     public void SetTempLocation(Location temp)
     {
         tempLocation = temp;
+    }
+
+    public void SetTempZoneID(int ID)
+    {
+        tempZoneID = ID;
     }
 }
