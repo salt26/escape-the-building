@@ -42,7 +42,7 @@ public class Move : MonoBehaviour {
     {
         move = this;
         player = GetComponent<Rigidbody>();
-        head = GameObject.Find("Head").GetComponent<Camera>();
+        head = GetComponentInChildren<Camera>();
         staminaSlider = GameObject.Find("StaminaSlider").GetComponent<Slider>();
         character = GetComponent<CharacterController>();
         audioSource = GetComponent<AudioSource>();

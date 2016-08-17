@@ -75,7 +75,7 @@ public class NoticeText : MonoBehaviour {
         else if (whichCoroutineStarts == 9 && whichCoroutineWorks != 9)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(9, "추적자가 쓰러졌다. 어서 도망가자!"));
+            StartCoroutine(NoticeMessage(9, "추적자가 탈진했다. 어서 도망가자!"));
         }
         else if (whichCoroutineStarts == 10 && whichCoroutineWorks != 10)
         {

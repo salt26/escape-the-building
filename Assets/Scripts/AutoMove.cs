@@ -26,17 +26,21 @@ public class AutoMove : MonoBehaviour {
     [HideInInspector] public bool isExhausted;
 
     float moveDistance;
+    //float turnAmount;
+    float forwardAmount;
     float stamina;
     Transform target;
     Vector3 targetPosition;
     NavMeshAgent agent;
     AudioSource audioSource;
+    Animator animator;
 
 	void Start () {
         target = GameObject.Find("Player").GetComponent<Transform>();
         targetPosition = target.position + new Vector3(0f, 0.25f, 0f);
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponentInChildren<AudioSource>();
+        animator = GetComponentInChildren<Animator>();
         moveDistance = 0f;
         stamina = maxStamina;
         isRunning = false;
@@ -61,6 +65,7 @@ public class AutoMove : MonoBehaviour {
         else
         {
             agent.speed = 0f;
+            animator.SetFloat("Forward", 0f, 0.1f, Time.fixedDeltaTime);
             return;
         }
 #if NEW_VERSION
@@ -153,6 +158,13 @@ public class AutoMove : MonoBehaviour {
                 else stamina = maxStamina;
             }
 
+            // 3D 모델에 걷거나 뛰는 애니메이션 적용
+            Vector3 move = agent.velocity;
+            move.y = 0f;
+            //turnAmount = Mathf.Atan2(move.x, move.z);
+            forwardAmount = move.magnitude / 3.6f;
+            animator.SetFloat("Forward", forwardAmount, 0.1f, Time.fixedDeltaTime);
+            //animator.SetFloat("Turn", turnAmount, 0.1f, Time.fixedDeltaTime);
 #if NEW_VERSION
         }
 #endif
