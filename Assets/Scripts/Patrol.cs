@@ -202,9 +202,17 @@ public class Patrol : MonoBehaviour {
             }
             else if (passed != null && (index = arrived.GetAdjacentHallLocations().IndexOf(passed)) != -1) // 인접한 복도 지점에서 온 경우
             {
-                // 마지막으로 지난 지점을 제외하고 도착 지점과 인접한 랜덤 복도 지점을 반환
-                nextIndex = Random.Range(1, arrived.GetAdjacentHallLocations().Count);
-                if (nextIndex == index) nextIndex = 0;
+                // 막다른 길이면 다시 돌아감
+                if (arrived.GetAdjacentHallLocations().Count == 1)
+                {
+                    nextIndex = 0;
+                }
+                // 막다른 길이 아니면 마지막으로 지난 지점을 제외하고 도착 지점과 인접한 랜덤 복도 지점을 반환
+                else
+                {
+                    nextIndex = Random.Range(1, arrived.GetAdjacentHallLocations().Count);
+                    if (nextIndex == index) nextIndex = 0;
+                }
                 return arrived.GetAdjacentHallLocations()[nextIndex];
             }
             else // 도착 지점에 오기 전 마지막으로 지난 지점이 현재 도착한 지점과 인접하지 않은 경우 또는 마지막으로 지난 지점이 없는 경우
@@ -233,9 +241,17 @@ public class Patrol : MonoBehaviour {
             }
             else if (passed != null && (index = arrived.GetAdjacentAllLocations().IndexOf(passed)) != -1) // 인접한 지점에서 온 경우
             {
-                // 마지막으로 지난 지점을 제외하고 도착 지점과 인접한 랜덤 지점을 반환
-                nextIndex = Random.Range(1, arrived.GetAdjacentAllLocations().Count);
-                if (nextIndex == index) nextIndex = 0;
+                // 막다른 길이면 다시 돌아감
+                if (arrived.GetAdjacentAllLocations().Count == 1)
+                {
+                    nextIndex = 0;
+                }
+                // 막다른 길이 아니면 마지막으로 지난 지점을 제외하고 도착 지점과 인접한 랜덤 지점을 반환
+                else
+                {
+                    nextIndex = Random.Range(1, arrived.GetAdjacentAllLocations().Count);
+                    if (nextIndex == index) nextIndex = 0;
+                }
                 return arrived.GetAdjacentAllLocations()[nextIndex];
             }
             else // 도착 지점에 오기 전 마지막으로 지난 지점이 현재 도착한 지점과 인접하지 않은 경우 또는 마지막으로 지난 지점이 없는 경우
