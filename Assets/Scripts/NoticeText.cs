@@ -89,6 +89,16 @@ public class NoticeText : MonoBehaviour {
             if (r == 0) StartCoroutine(NoticeMessage(11, "추적자가 바로 앞까지 쫓아왔어!"));
             else if (r == 1) StartCoroutine(NoticeMessage(11, "앗, 위험하다!"));
         }
+        else if (whichCoroutineStarts == 12 && whichCoroutineWorks != 12)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(12, "밖으로 통하는 문이지만, 잠긴 듯하다."));
+        }
+        else if (whichCoroutineStarts == 13 && whichCoroutineWorks != 13)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(13, "이 출입문은 가지고 있는 열쇠들로 열리지 않는다."));
+        }
 	}
 
     public void NoticeLockedDoor()
@@ -144,6 +154,16 @@ public class NoticeText : MonoBehaviour {
     public void NoticeChaserApproachByRunning()
     {
         whichCoroutineStarts = 11;
+    }
+
+    public void NoticeLockedEntranceDoor()
+    {
+        whichCoroutineStarts = 12;
+    }
+
+    public void NoticeFailedToUnlockEntrance()
+    {
+        whichCoroutineStarts = 13;
     }
 
     IEnumerator NoticeMessage(int coroutineNumber, string message)

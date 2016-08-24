@@ -16,7 +16,7 @@ public class Capture : MonoBehaviour {
 	void OnTriggerEnter (Collider other) {
         if (other.name != "Player") return;
 
-        if (!isGameOver && !Escape.escape.GetHasEscaped())
+        if (!isGameOver && !Manager.manager.GetHasEscaped())
         {
             player.GetComponent<Move>().isCaptured = true;
             player.GetComponent<Move>().GetMouseLook().SetCursorLock(false);
@@ -25,7 +25,7 @@ public class Capture : MonoBehaviour {
             NoticeText.ntxt.NoticeCaptured();
             gameOverAnim.SetTrigger("gameOver");
             isGameOver = true;
-            Escape.escape.SetIsGameOver();
+            Manager.manager.SetIsGameOver();
         }
 	}
 }

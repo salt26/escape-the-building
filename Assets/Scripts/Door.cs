@@ -53,7 +53,8 @@ public class Door : MonoBehaviour {
 
                 if (inventory.NumberOfNotUsedKey(isEntranceType) == 0)
                 {
-                    NoticeText.ntxt.NoticeLockedDoor();
+                    if (!isEntranceType) NoticeText.ntxt.NoticeLockedDoor();
+                    else NoticeText.ntxt.NoticeLockedEntranceDoor();
                     haveNoKey = true;
                 }
 
@@ -65,7 +66,8 @@ public class Door : MonoBehaviour {
                     if (!haveNoKey)
                     {
                         //Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
-                        NoticeText.ntxt.NoticeFailedToUnlock();
+                        if (!isEntranceType) NoticeText.ntxt.NoticeFailedToUnlock();
+                        else NoticeText.ntxt.NoticeFailedToUnlockEntrance();
                     }
                     return;
                 }

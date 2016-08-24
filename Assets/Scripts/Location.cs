@@ -1,10 +1,6 @@
-﻿#define NEW_VERSION
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-#if NEW_VERSION
-using UnityEngine.SceneManagement;
-#endif
 
 public class Location : MonoBehaviour {
 
@@ -67,11 +63,6 @@ public class Location : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-#if NEW_VERSION
-        if (SceneManager.GetActiveScene().name == "3.Modeling") {
-            return;
-        }
-#endif
         if (this.GetLocationType() <= 3 && other.tag == "Chaser" && other.gameObject.GetComponent<Patrol>().GetTempLocation() != this)
         {
             other.GetComponent<Patrol>().SetTempLocation(this);

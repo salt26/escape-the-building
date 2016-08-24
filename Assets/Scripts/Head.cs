@@ -1,21 +1,14 @@
-﻿#define NEW_VERSION
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using UnityStandardAssets.Utility;
-#if NEW_VERSION
-using UnityEngine.SceneManagement;
-#endif
 
 public class Head : MonoBehaviour {
 
     public CurveControlledBob motionBob = new CurveControlledBob();
-    //public float stepInterval;
 
     public AudioClip[] breathSounds;
 
     Camera sight;
-    float turningAngle; // 정면으로부터 고개(시야)가 회전한 각도
-    //bool beforeStepOn; // 발이 땅에 닿기 전까지(머리가 내려오는 중에) true
     float gradient; // 머리 위치의 y값 변화량
     AudioSource audioSource;
 	
@@ -24,35 +17,12 @@ public class Head : MonoBehaviour {
         audioSource = GetComponent<AudioSource>();
         motionBob.Setup(sight, 1f);
         motionBob.VerticalToHorizontalRatio = 2f;
-        turningAngle = 0f;
         gradient = 1f;
 	}
 	
 	void FixedUpdate () {
         // 추적자에게 잡히면 고개(시야)를 움직일 수 없음.
         if (Move.move.isCaptured) return;
-
-#if NEW_VERSION
-        if (SceneManager.GetActiveScene().name == "3.Modeling" || SceneManager.GetActiveScene().name == "4.Asset")
-        {
-            // 몸은 가만히 있고 고개(시야)만 돌리는 기능. Shift + 왼쪽 화살표 키 또는 Shift + 오른쪽 화살표 키를 눌러 돌릴 수 있음.
-            // -90도 ~ 90도 사이에서 움직임
-            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.LeftArrow) && turningAngle > -90f) turningAngle -= 5f;
-            else if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.RightArrow) && turningAngle < 90f) turningAngle += 5f;
-            turningAngle = Mathf.Clamp(turningAngle, -90f, 90f);
-
-            // 고개(시야)를 돌린 후 키를 놓았을 때 다시 정면을 바라보도록 함.
-            if (!((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.LeftArrow))
-                && !((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.RightArrow)) && turningAngle != 0f)
-            {
-                if (Mathf.Abs(turningAngle) < 2f) turningAngle = 0f;
-                else if (turningAngle < 0f) turningAngle += 3f;
-                else if (turningAngle > 0f) turningAngle -= 3f;
-            }
-
-            sight.transform.localRotation = Quaternion.Euler(new Vector3(0f, turningAngle, 0f));
-        }
-#endif
 
         // v.0.4.1 이후로 고개 회전은 MouseLook.cs에서 담당함.
 

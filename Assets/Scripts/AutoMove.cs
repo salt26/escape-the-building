@@ -1,9 +1,5 @@
-﻿#define NEW_VERSION
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-#if NEW_VERSION
-using UnityEngine.SceneManagement;
-#endif
 
 /// <summary>
 /// 추적자(캡슐)의 움직임을 담당하는 클래스
@@ -26,7 +22,6 @@ public class AutoMove : MonoBehaviour {
     [HideInInspector] public bool isExhausted;
 
     float moveDistance;
-    //float turnAmount;
     float forwardAmount;
     float stamina;
     Transform target;
@@ -46,21 +41,13 @@ public class AutoMove : MonoBehaviour {
         isRunning = false;
         isExhausted = false;
 	}
-	
-	void FixedUpdate () {
+
+    void FixedUpdate()
+    {
         targetPosition = target.position + new Vector3(0f, 0.25f, 0f);
-        NavMeshHit navhit;
-        if (!Escape.escape.GetHasEscaped() && !Move.move.isCaptured)
+        if (!Manager.manager.GetHasEscaped() && !Move.move.isCaptured)
         {
-#if NEW_VERSION
-            if (SceneManager.GetActiveScene().name == "3.Modeling") {
-                agent.SetDestination(target.position + new Vector3(0f, 0.2f, 0f));
-            } else {
-#endif
             agent.SetDestination(GetComponent<Patrol>().GetDestPosition()); // 목적지 설정
-#if NEW_VERSION
-            }
-#endif
         }
         else
         {
@@ -68,107 +55,61 @@ public class AutoMove : MonoBehaviour {
             animator.SetFloat("Forward", 0f, 0.1f, Time.fixedDeltaTime);
             return;
         }
-#if NEW_VERSION
-        if (SceneManager.GetActiveScene().name == "2.Navigation")
+
+        if (stamina <= 0f) StartCoroutine("Exhaustion");
+
+        // 순찰 상태이거나 주인공을 목격하지 못하고 주인공의 발소리만 들은 경우 걷는다. 탈진해도 뛰는 상태가 해제된다.
+        if ((GetComponent<Patrol>().GetMoveState() % 2 == 0 && isRunning) || isExhausted ||
+            (restrainExhaustion && stamina / maxStamina < 0.05f)) isRunning = false;
+        // 주인공을 목격하거나 목격했던 상태에서 소리가 들리면 뛴다. (물론 체력이 어느 정도 있을 때)
+        else if (GetComponent<Patrol>().GetMoveState() % 2 == 1 && !isRunning &&
+            stamina / maxStamina > 0.1f) isRunning = true;
+
+        // 탈진한 경우
+        if (isExhausted)
         {
-            if (!agent.Raycast(target.position, out navhit))
-            {
-                agent.speed = 14f;
-            }
-            else agent.speed = 7f;
+            agent.speed = 0f;
+            if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.25f;
+            else stamina = maxStamina;
         }
-        else if (SceneManager.GetActiveScene().name == "3.Modeling" || SceneManager.GetActiveScene().name == "4.Asset")
+        // 뛰는 경우
+        else if (isRunning)
         {
-            if (GetComponent<Patrol>().GetMoveState() % 2 == 0)
+            agent.speed = runningSpeed;
+            if (agent.velocity.magnitude > 0f)
             {
-                agent.speed = walkingSpeed;
-                if (agent.velocity.magnitude > 0f)
+                moveDistance += runningSpeed * Time.fixedDeltaTime;
+                if (moveDistance > runningStepDistance)
                 {
-                    moveDistance += walkingSpeed * Time.fixedDeltaTime;
-                    if (moveDistance > walkingStepDistance)
-                    {
-                        moveDistance -= walkingStepDistance;
-                        PlayFootStepAudio(false);
-                    }
+                    moveDistance -= runningStepDistance;
+                    PlayFootStepAudio(true);
                 }
             }
-            // 주인공을 목격하거나 목격했던 상태에서 소리가 들리면 뛴다. /* 나중에 탈진 고려해서 체력 낮으면 뛰지 않고 걷는 기능 만들기 */
-            else
-            {
-                agent.speed = runningSpeed;
-                if (agent.velocity.magnitude > 0f)
-                {
-                    moveDistance += runningSpeed * Time.fixedDeltaTime;
-                    if (moveDistance > runningStepDistance)
-                    {
-                        moveDistance -= runningStepDistance;
-                        PlayFootStepAudio(true);
-                    }
-                }
-            }
+            stamina -= Time.fixedDeltaTime;
         }
+        // 걷는 경우
         else
         {
-#endif
-            if (stamina <= 0f) StartCoroutine("Exhaustion");
-
-            // 순찰 상태이거나 주인공을 목격하지 못하고 주인공의 발소리만 들은 경우 걷는다. 탈진해도 뛰는 상태가 해제된다.
-            if ((GetComponent<Patrol>().GetMoveState() % 2 == 0 && isRunning) || isExhausted ||
-                (restrainExhaustion && stamina / maxStamina < 0.05f)) isRunning = false;
-            // 주인공을 목격하거나 목격했던 상태에서 소리가 들리면 뛴다. (물론 체력이 어느 정도 있을 때)
-            else if (GetComponent<Patrol>().GetMoveState() % 2 == 1 && !isRunning &&
-                stamina / maxStamina > 0.1f) isRunning = true;
-            
-            // 탈진한 경우
-            if (isExhausted)
+            agent.speed = walkingSpeed;
+            if (agent.velocity.magnitude > 0f)
             {
-                agent.speed = 0f;
-                if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.25f;
-                else stamina = maxStamina;
-            }
-            // 뛰는 경우
-            else if (isRunning)
-            {
-                agent.speed = runningSpeed;
-                if (agent.velocity.magnitude > 0f)
+                moveDistance += walkingSpeed * Time.fixedDeltaTime;
+                if (moveDistance > walkingStepDistance)
                 {
-                    moveDistance += runningSpeed * Time.fixedDeltaTime;
-                    if (moveDistance > runningStepDistance)
-                    {
-                        moveDistance -= runningStepDistance;
-                        PlayFootStepAudio(true);
-                    }
+                    moveDistance -= walkingStepDistance;
+                    PlayFootStepAudio(false);
                 }
-                stamina -= Time.fixedDeltaTime;
             }
-            // 걷는 경우
-            else
-            {
-                agent.speed = walkingSpeed;
-                if (agent.velocity.magnitude > 0f)
-                {
-                    moveDistance += walkingSpeed * Time.fixedDeltaTime;
-                    if (moveDistance > walkingStepDistance)
-                    {
-                        moveDistance -= walkingStepDistance;
-                        PlayFootStepAudio(false);
-                    }
-                }
-                if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.55f;
-                else stamina = maxStamina;
-            }
-
-            // 3D 모델에 걷거나 뛰는 애니메이션 적용
-            Vector3 move = agent.velocity;
-            move.y = 0f;
-            //turnAmount = Mathf.Atan2(move.x, move.z);
-            forwardAmount = move.magnitude / 3.6f;
-            animator.SetFloat("Forward", forwardAmount, 0.1f, Time.fixedDeltaTime);
-            //animator.SetFloat("Turn", turnAmount, 0.1f, Time.fixedDeltaTime);
-#if NEW_VERSION
+            if (stamina < maxStamina) stamina += Time.fixedDeltaTime * 0.55f;
+            else stamina = maxStamina;
         }
-#endif
-	}
+
+        // 3D 모델에 걷거나 뛰는 애니메이션 적용
+        Vector3 move = agent.velocity;
+        move.y = 0f;
+        forwardAmount = move.magnitude / 3.6f;
+        animator.SetFloat("Forward", forwardAmount, 0.1f, Time.fixedDeltaTime);
+    }
 
     IEnumerator Exhaustion()
     {

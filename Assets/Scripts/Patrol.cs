@@ -65,11 +65,11 @@ public class Patrol : MonoBehaviour {
         else if (rayHit.collider.name == "Player")
         {
             // 버그로 인해 딱 1프레임 동안만 주인공을 보고 돌진하는 경우를 방지
-            if (moveState != 1 && seeCount < 0.2f)
+            if (moveState != 1 && seeCount < 0.1f)
             {
                 seeCount += Time.fixedDeltaTime;
             }
-            else if (moveState != 1 && seeCount >= 0.2f)
+            else if (moveState != 1 && seeCount >= 0.1f)
             {
                 seeCount = 0f;
                 moveState = 1;
@@ -137,17 +137,13 @@ public class Patrol : MonoBehaviour {
             // 그 지점을 마지막으로 지난 지점으로 설정
             passedLocation = tempLocation;
         }
-        
-        /* 한 자리에 멈춰서 4초(?) 이상 움직이지 않는 경우 주인공 무시하고 무조건 경로를 재탐색하도록 하기 */
-        //stopCount += 3f * Time.fixedDeltaTime;
-        //Debug.Log(stopCount);
 
         // 추적자가 주인공에게 접근했을 때 경고로서 안내 텍스트를 띄워준다. (잡히거나 탈출하면 띄워주지 않음.)
         if (isSameFloor(target, chaser.position) && (isNearEnough(target, chaser.position, 5f) && !isNearEnough(target, chaser.position, 4.8f)) &&
-            !GetComponent<AutoMove>().isRunning && !GetComponent<AutoMove>().isExhausted && !Escape.escape.GetHasEscaped() && !Move.move.isCaptured)
+            !GetComponent<AutoMove>().isRunning && !GetComponent<AutoMove>().isExhausted && !Manager.manager.GetHasEscaped() && !Move.move.isCaptured)
             NoticeText.ntxt.NoticeChaserApproachByWalking();
         else if (isSameFloor(target, chaser.position) && (isNearEnough(target, chaser.position, 7.1f) && !isNearEnough(target, chaser.position, 6.9f)) &&
-            GetComponent<AutoMove>().isRunning && !Escape.escape.GetHasEscaped() && !Move.move.isCaptured)
+            GetComponent<AutoMove>().isRunning && !Manager.manager.GetHasEscaped() && !Move.move.isCaptured)
             NoticeText.ntxt.NoticeChaserApproachByRunning();
 
         // 주인공을 목격한 경우(주인공과 추적자 사이에 장애물이 없는 경우) 발소리에 Lowpass를 적용하지 않는다.
@@ -161,7 +157,7 @@ public class Patrol : MonoBehaviour {
             GetComponentInChildren<Lowpass>().isSeeing = false;
         }
 
-        //if (rayHit.collider != null) Debug.Log(rayHit.collider.name + " " + moveState);
+        //if (rayHit.collider != null) Debug.Log(patrolMode + " " + rayHit.collider.name + " " + moveState);
     }
 
     // 같은 층에서 A, B 사이의 거리가 distance보다 가까우면 true 반환

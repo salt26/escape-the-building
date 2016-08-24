@@ -14,7 +14,7 @@ public class AudioOutside : MonoBehaviour {
         snapshot = ReverbSnapshots.rs.GetSnapshotByZoneType(5);
     }
 
-    void OnTriggerExit(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
         snapshot.TransitionTo(OverTime);

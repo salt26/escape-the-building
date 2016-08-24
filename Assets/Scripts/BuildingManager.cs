@@ -35,7 +35,13 @@ public class BuildingManager : MonoBehaviour {
             if (location.GetLocationType() == 2) HallLocations.Add(location);
         }
 
-        RoomLocations.Remove(FindLocationByID(1118)); // 주인공 시작 지점 바로 앞에 열쇠가 생성되는 것 방지
+        // 열쇠를 랜덤으로 5개만 남기고 모두 지워버림
+        while (Keys.Count > 5)
+        {
+            Keys.RemoveAt(Random.Range(0, Keys.Count));
+        }
+
+        RoomLocations.Remove(FindLocationByID(4105)); // 주인공 시작 지점 바로 앞에 열쇠가 생성되는 것 방지
 
         if (RoomLocations.Count < Keys.Count) // 비둘기집 원리
         {
