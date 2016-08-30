@@ -11,6 +11,7 @@ public class Head : MonoBehaviour {
     Camera sight;
     float gradient; // 머리 위치의 y값 변화량
     AudioSource audioSource;
+    Vector3 pos;
 	
 	void Start () {
         sight = GetComponent<Camera>();
@@ -18,6 +19,7 @@ public class Head : MonoBehaviour {
         motionBob.Setup(sight, 1f);
         motionBob.VerticalToHorizontalRatio = 2f;
         gradient = 1f;
+        pos = new Vector3(0f, 1.4f, 0f);
 	}
 	
 	void FixedUpdate () {
@@ -31,20 +33,41 @@ public class Head : MonoBehaviour {
         // 발을 디디는 순간(머리가 가장 아래로 내려갔다 올라오는 순간) 발걸음 소리를 재생함.
         if (Move.move.isMoving && Move.move.character.isGrounded)
         {
-            float oldY = sight.transform.localPosition.y;
-            float oldGradient = gradient;
-            if (Move.move.isRunning)
+            if (MainManager.mm.useHeadBob)
             {
-                motionBob.VerticalBobRange = 0.04f;
-                sight.transform.localPosition = motionBob.DoHeadBob(Move.move.runningSpeed / Move.move.runningStepDistance);
+                float oldY = sight.transform.localPosition.y;
+                float oldGradient = gradient;
+                if (Move.move.isRunning)
+                {
+                    motionBob.VerticalBobRange = 0.04f;
+                    sight.transform.localPosition = motionBob.DoHeadBob(Move.move.runningSpeed / Move.move.runningStepDistance);
+                }
+                else
+                {
+                    motionBob.VerticalBobRange = 0.02f;
+                    sight.transform.localPosition = motionBob.DoHeadBob(Move.move.walkingSpeed / Move.move.walkingStepDistance);
+                }
+                gradient = sight.transform.localPosition.y - oldY;
+                if (oldGradient <= 0f && gradient > 0f) Move.move.PlayFootStepAudio();
             }
             else
             {
-                motionBob.VerticalBobRange = 0.02f;
-                sight.transform.localPosition = motionBob.DoHeadBob(Move.move.walkingSpeed / Move.move.walkingStepDistance);
+                sight.transform.localPosition = new Vector3(0f, 1.4f, 0f);
+                float oldY = pos.y;
+                float oldGradient = gradient;
+                if (Move.move.isRunning)
+                {
+                    motionBob.VerticalBobRange = 0.04f;
+                    pos = motionBob.DoHeadBob(Move.move.runningSpeed / Move.move.runningStepDistance);
+                }
+                else
+                {
+                    motionBob.VerticalBobRange = 0.02f;
+                    pos = motionBob.DoHeadBob(Move.move.walkingSpeed / Move.move.walkingStepDistance);
+                }
+                gradient = pos.y - oldY;
+                if (oldGradient <= 0f && gradient > 0f) Move.move.PlayFootStepAudio();
             }
-            gradient = sight.transform.localPosition.y - oldY;
-            if (oldGradient <= 0f && gradient > 0f) Move.move.PlayFootStepAudio();
         }
 
         // 체력이 낮으면 숨소리를 낸다.
@@ -52,12 +75,12 @@ public class Head : MonoBehaviour {
         {
             PlayBreathAudio(0.85f);
         }
-        else if (Move.move.GetStamina() / Move.move.maxStamina < 0.25f && Move.move.isRunning && !audioSource.isPlaying)
+        else if (Move.move.GetStamina() / Move.move.maxStamina < 0.16f && Move.move.isRunning && !audioSource.isPlaying)
         {
             PlayBreathAudio(0.6f);
         }
-        else if (((Move.move.GetStamina() / Move.move.maxStamina < 0.5f && Move.move.isRunning) ||
-            (Move.move.GetStamina() / Move.move.maxStamina < 0.25f && !Move.move.isRunning)) && !audioSource.isPlaying)
+        else if (((Move.move.GetStamina() / Move.move.maxStamina < 0.33f && Move.move.isRunning) ||
+            (Move.move.GetStamina() / Move.move.maxStamina < 0.16f && !Move.move.isRunning)) && !audioSource.isPlaying)
         {
             PlayBreathAudio(0.25f);
         }

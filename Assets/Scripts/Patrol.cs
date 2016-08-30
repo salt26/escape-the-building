@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 /// <summary>
@@ -9,6 +10,7 @@ public class Patrol : MonoBehaviour {
     public int patrolMode;              // 1이면 복도만(남자1), 2이면 복도와 잠기지 않은 방 전부를(남자2), 3이면 완전 랜덤으로(여자) 순찰함
     public float hearing = 10f;         // [능력치] 주인공의 발소리를 듣는 능력. 주인공이 뛸 때를 기준으로 주인공을 감지하는 최대 거리.
     public GameObject playerLocation;
+    public GameObject[] tutorialBoxes;  // 튜토리얼용. 보통은 꼭 없어도 됨.
 
     private float seeCount;
     private int moveState;              // 움직이는 상태가 0이면 순찰 중, 1이면 주인공을 목격하여 뛰어감, 2이면 주인공 발소리를 듣고 걸어감,
@@ -17,6 +19,10 @@ public class Patrol : MonoBehaviour {
     private Location destLocation;      // 목적 지점
     private Location passedLocation;    // 이전에 마지막으로 설정되었던 목적 지점
     private int tempZoneID;             // 이 추적자가 현재 머물러 있는 AudioZone의 ID
+    private bool isTutorial;
+    private bool tutorialBox4;
+    private bool tutorialBox5;
+    private bool tutorialBox7;
     Vector3 target;
     Transform chaser;
 
@@ -28,6 +34,11 @@ public class Patrol : MonoBehaviour {
         seeCount = 0f;
         moveState = 0;
         tempZoneID = 0;
+        if (SceneManager.GetActiveScene().name == "TrainingRoom4") isTutorial = true;
+        else isTutorial = false;
+        tutorialBox4 = false;
+        tutorialBox5 = false;
+        tutorialBox7 = false;
 	}
 
     void FixedUpdate()
@@ -81,6 +92,14 @@ public class Patrol : MonoBehaviour {
                 // 기존 목적 지점을 버리고 주인공을 우선적으로 쫓아감
                 playerLocation.GetComponent<Transform>().position = target + new Vector3(0f, 0.2f, 0f);
                 destLocation = playerLocation.GetComponent<Location>();
+
+                // 튜토리얼에서 주인공을 목격하면
+                if (isTutorial && !tutorialBox4)
+                {
+                    tutorialBoxes[0].SetActive(true);
+                    Manager.manager.OpenMsgBox();
+                    tutorialBox4 = true;
+                }
             }
         }
         // 주인공을 목격하지 못했고 주인공의 발소리를 들었다면 (또는 주인공이 계단에 있고 거리가 가까우면)
@@ -123,6 +142,14 @@ public class Patrol : MonoBehaviour {
                 moveState = 0;
                 //Debug.Log("moveState = " + moveState);
                 nextLocation = NextDestLocation(passedLocation, null);          // 마지막으로 지난 지점을 기준으로 순찰 경로에 합류
+
+                // 튜토리얼에서 추적자를 따돌린 경우
+                if (isTutorial && !tutorialBox7 && !isNearEnough(target, chaser.position, 5f))
+                {
+                    tutorialBoxes[2].SetActive(true);
+                    Manager.manager.OpenMsgBox();
+                    tutorialBox7 = true;
+                }
             }
             destLocation = nextLocation;
         }
@@ -157,6 +184,12 @@ public class Patrol : MonoBehaviour {
             GetComponentInChildren<Lowpass>().isSeeing = false;
         }
 
+        // 튜토리얼에서 같은 방 안에서 주인공을 발견하면
+        if (isTutorial && Move.move.GetTempZoneID() == GetTempZoneID() && tempZoneID != 0 && (GetTempZoneID() % 100) < 17 && !tutorialBox5) {
+            tutorialBoxes[1].SetActive(true);
+            Manager.manager.OpenMsgBox();
+            tutorialBox5 = true;
+        }
         //if (rayHit.collider != null) Debug.Log(patrolMode + " " + rayHit.collider.name + " " + moveState);
     }
 

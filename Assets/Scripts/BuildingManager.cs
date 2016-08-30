@@ -7,13 +7,11 @@ public class BuildingManager : MonoBehaviour {
     static public BuildingManager buildingManager;
 
     public List<GameObject> Locations = new List<GameObject>();
-    public List<GameObject> Doors = new List<GameObject>();
     public List<GameObject> Keys = new List<GameObject>();
 
     List<Location> AllLocations = new List<Location>();
     List<Location> HallLocations = new List<Location>();
     List<Location> RoomLocations = new List<Location>();
-    List<Door> AllDoors = new List<Door>();
 
     //KeyInventory inventory;
 
@@ -28,6 +26,7 @@ public class BuildingManager : MonoBehaviour {
 
         foreach (GameObject locationObject in Locations)
         {
+            if (locationObject == null) continue;
             Location location = locationObject.GetComponent<Location>();
             if (location == null) continue;
             AllLocations.Add(location);
@@ -35,8 +34,8 @@ public class BuildingManager : MonoBehaviour {
             if (location.GetLocationType() == 2) HallLocations.Add(location);
         }
 
-        // 열쇠를 랜덤으로 5개만 남기고 모두 지워버림
-        while (Keys.Count > 5)
+        // 열쇠를 랜덤으로 7개만 남기고 모두 지워버림
+        while (Keys.Count > 7)
         {
             Keys.RemoveAt(Random.Range(0, Keys.Count));
         }
@@ -57,13 +56,6 @@ public class BuildingManager : MonoBehaviour {
                 RoomLocations.Remove(selectedLocation); // 비복원추출, RoomLocations는 일회용
 
             }
-        }
-
-        foreach (GameObject doorObject in Doors)
-        {
-            Door door = doorObject.GetComponent<Door>();
-            if (door == null) continue;
-            AllDoors.Add(door);
         }
 
         KeyText.ktxt.SetInitialKeyNumber(Keys.Count);

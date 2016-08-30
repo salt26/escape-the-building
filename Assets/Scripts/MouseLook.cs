@@ -17,7 +17,15 @@ public class MouseLook
     private Quaternion characterTargetRot;
     private Quaternion cameraTargetRot;
     private bool cursorIsLocked = true;
-    //private float turningAngle;
+
+    public void UpdateSensitivity()
+    {
+        if (XSensitivity != MainManager.mm.mouseSensitivity)
+        {
+            XSensitivity = MainManager.mm.mouseSensitivity;
+            YSensitivity = MainManager.mm.mouseSensitivity;
+        }
+    }
 
     // LookRotation 함수를 사용하기 전에 초기화해주는 함수
     public void Init(Transform character, Transform camera)
@@ -26,7 +34,6 @@ public class MouseLook
         cameraTargetRot = camera.localRotation;
 
         player = GameObject.Find("Player").GetComponent<Move>();
-        //turningAngle = 0f;
     }
 
     // 커서의 움직임에 따라 주인공의 몸통과 머리를 회전하는 함수
@@ -59,27 +66,6 @@ public class MouseLook
             }
 
         }
-        //if (player.isExhausted) camera.localRotation = Quaternion.Euler(90f, 0f, 0f);
-
-        /*
-        // 몸은 가만히 있고 고개(시야)만 돌리는 기능. A(왼쪽 화살표)키 또는 D(오른쪽 화살표)키를 눌러 돌릴 수 있음.
-        // -90도 ~ 90도 사이에서 움직임
-        if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) && turningAngle > -90f) turningAngle -= 5f;
-        else if ((Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && turningAngle < 90f) turningAngle += 5f;
-        turningAngle = Mathf.Clamp(turningAngle, -90f, 90f);
-
-        // 고개(시야)를 돌린 후 키를 놓았을 때 다시 정면을 바라보도록 함.
-        if (!(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) ||
-            Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) && turningAngle != 0f)
-        {
-            if (Mathf.Abs(turningAngle) < 2f) turningAngle = 0f;
-            else if (turningAngle < 0f) turningAngle += 3f;
-            else if (turningAngle > 0f) turningAngle -= 3f;
-        }
-
-        // 고개만 회전하는 기능 반영
-        camera.localRotation = Quaternion.Euler(camera.localRotation.eulerAngles.x, turningAngle, 0f);
-        */
 
         UpdateCursorLock();
     }
@@ -105,6 +91,7 @@ public class MouseLook
 
     private void InternalLockUpdate()
     {
+        /*
         // Esc키를 누르면 커서 잠금이 해제됨.
         if (Input.GetKeyUp(KeyCode.Escape))
         {
@@ -115,6 +102,7 @@ public class MouseLook
         {
             cursorIsLocked = true;
         }
+         * */
 
         if (cursorIsLocked)
         {
@@ -144,5 +132,6 @@ public class MouseLook
 
         return q;
     }
+
 
 }

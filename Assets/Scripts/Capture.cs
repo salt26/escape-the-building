@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Capture : MonoBehaviour {
 
+    public GameObject msgBox;
     private GameObject player;
     private Animator gameOverAnim;
     private bool isGameOver;
@@ -21,11 +22,21 @@ public class Capture : MonoBehaviour {
             player.GetComponent<Move>().isCaptured = true;
             player.GetComponent<Move>().GetMouseLook().SetCursorLock(false);
             GetComponent<NavMeshAgent>().autoBraking = true;
-            StateText.stxt.PleaseRestart();
             NoticeText.ntxt.NoticeCaptured();
             gameOverAnim.SetTrigger("gameOver");
             isGameOver = true;
             Manager.manager.SetIsGameOver();
+            if (msgBox != null)
+            {
+                StartCoroutine("OpenDeadMsgBox");
+            }
         }
 	}
+
+    IEnumerator OpenDeadMsgBox()
+    {
+        yield return new WaitForSeconds(2f);
+        msgBox.SetActive(true);
+        Manager.manager.OpenMsgBox();
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Collections;
 
@@ -15,6 +16,8 @@ public class Move : MonoBehaviour {
     public float maxStamina = 30f;              // [능력치] 최대 체력. 달리기를 지속할 수 있는 시간(초)
     public AudioClip[] footstepSounds;
     public Image sliderFill;
+    public GameObject tutorialBox;              // 튜토리얼용. 보통은 None이어도 됨.
+    public GameObject tutorialBox6;             // 튜토리얼용. 보통 꼭 없어도 됨.
     [HideInInspector] public float moveSpeed;
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool isRunning;
@@ -24,6 +27,9 @@ public class Move : MonoBehaviour {
 
     float stamina;                              // 현재 체력
     int tempZoneID;                             // 주인공이 현재 머물러 있는 AudioZone의 ID
+    bool isTutorial;
+    bool isTutorial4;
+    bool tutorialBox6_;
     Vector3 movement;
     Camera head;
     Slider staminaSlider;
@@ -42,6 +48,10 @@ public class Move : MonoBehaviour {
         gameOverAnim = GameObject.Find("GameOverPanel").GetComponent<Animator>();
         isCaptured = false;
         isExhausted = false;
+        isTutorial = false;
+        tutorialBox6_ = false;
+        if (SceneManager.GetActiveScene().name == "TrainingRoom4") isTutorial4 = true;
+        else isTutorial4 = false;
         tempZoneID = 0;
         stamina = maxStamina;
         staminaSlider.maxValue = maxStamina;
@@ -115,6 +125,14 @@ public class Move : MonoBehaviour {
         else
         {
             sliderFill.color = new Color(1f, (stamina / maxStamina) * 2f + 0.28f, (stamina / maxStamina) * 2f + 0.28f, 0.75f);
+
+            // 튜토리얼용 코드
+            if (isTutorial4 && !tutorialBox6_)
+            {
+                tutorialBox6.SetActive(true);
+                Manager.manager.OpenMsgBox();
+                tutorialBox6_ = true;
+            }
         }
 
         // 이동
@@ -151,6 +169,12 @@ public class Move : MonoBehaviour {
         stamina = 0f;
         gameOverAnim.SetTrigger("exhaustion");
         NoticeText.ntxt.NoticePlayerExhausted();
+        if (isTutorial)
+        {
+            tutorialBox.SetActive(true);
+            Manager.manager.OpenMsgBox();
+            Open1101Door();
+        }
         yield return new WaitForSeconds(4f);
         gameOverAnim.SetTrigger("recoverFromExhaustion");
         isExhausted = false;
@@ -209,5 +233,19 @@ public class Move : MonoBehaviour {
     public void SetTempZoneID(int ID)
     {
         tempZoneID = ID;
+    }
+
+    // 튜토리얼용 함수
+    public void SetStamina(float value)
+    {
+        stamina = value;
+        staminaSlider.value = stamina;
+        isTutorial = true;
+    }
+
+    // 튜토리얼용 함수
+    void Open1101Door()
+    {
+        GameObject.Find("DoorL1101").GetComponentInChildren<Door>().UnlockTutorial();
     }
 }

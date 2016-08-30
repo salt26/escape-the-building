@@ -9,6 +9,8 @@ public class NoticeText : MonoBehaviour {
     int whichCoroutineStarts;
     int whichCoroutineWorks;
 
+    int mapID;
+
     Text text;
 
     void Awake()
@@ -22,6 +24,7 @@ public class NoticeText : MonoBehaviour {
 
         whichCoroutineStarts = 0;
         whichCoroutineWorks = 0;
+        mapID = 0;
         text.text = "";
 
 	}
@@ -99,6 +102,26 @@ public class NoticeText : MonoBehaviour {
             StopAllCoroutines();
             StartCoroutine(NoticeMessage(13, "이 출입문은 가지고 있는 열쇠들로 열리지 않는다."));
         }
+        else if (whichCoroutineStarts == 14 && whichCoroutineWorks != 14)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(14, "쓰러질 듯 힘들지만 문을 열었어! 문을 열고 나가자."));
+        }
+        else if (whichCoroutineStarts == 15 && whichCoroutineWorks != 15)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(15, "50초가 지나 문이 열렸다! 문을 열고 나가자."));
+        }
+        else if (whichCoroutineStarts == 16 && whichCoroutineWorks != 16)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(16, "이곳의 지도는 가지고 있지 않다."));
+        }
+        else if (whichCoroutineStarts == 17 && whichCoroutineWorks != 17 && mapID != 0)
+        {
+            StopAllCoroutines();
+            StartCoroutine(NoticeMessage(17, "여기는 " + (mapID / 1000) + "동 건물의 " + ((mapID / 100) % 10) + "층이다."));
+        }
 	}
 
     public void NoticeLockedDoor()
@@ -164,6 +187,27 @@ public class NoticeText : MonoBehaviour {
     public void NoticeFailedToUnlockEntrance()
     {
         whichCoroutineStarts = 13;
+    }
+
+    public void NoticeTutorialUnlockDoor()
+    {
+        whichCoroutineStarts = 14;
+    }
+
+    public void NoticeTutorialUnlockDoor2()
+    {
+        whichCoroutineStarts = 15;
+    }
+
+    public void NoticeMapInvalid()
+    {
+        whichCoroutineStarts = 16;
+    }
+
+    public void NoticeMap(int map)
+    {
+        mapID = map;
+        whichCoroutineStarts = 17;
     }
 
     IEnumerator NoticeMessage(int coroutineNumber, string message)

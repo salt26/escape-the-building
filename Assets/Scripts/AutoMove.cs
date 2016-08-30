@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 /// <summary>
@@ -18,12 +19,15 @@ public class AutoMove : MonoBehaviour {
     public bool restrainExhaustion = false;     // [능력치] false이면 끝까지 달리다가 탈진하고, true이면 탈진하기 직전에 달리기를 멈추고 걸어감.
                                                 // [능력치]가 두 개 더 있는데, 하나는 Nav Mesh Agent의 Acceleration(가속도)이고, 다른 하나는 Patrol의 hearing(청력)이다.
     public AudioClip[] footstepSounds;
+    public GameObject tutorialBox;              // 튜토리얼용. 보통은 꼭 없어도 됨.
     [HideInInspector] public bool isRunning;
     [HideInInspector] public bool isExhausted;
 
     float moveDistance;
     float forwardAmount;
     float stamina;
+    bool isTutorial;
+    bool tutorialBox8;
     Transform target;
     Vector3 targetPosition;
     NavMeshAgent agent;
@@ -40,6 +44,9 @@ public class AutoMove : MonoBehaviour {
         stamina = maxStamina;
         isRunning = false;
         isExhausted = false;
+        tutorialBox8 = false;
+        if (SceneManager.GetActiveScene().name == "TrainingRoom4") isTutorial = true;
+        else isTutorial = false;
 	}
 
     void FixedUpdate()
@@ -116,6 +123,12 @@ public class AutoMove : MonoBehaviour {
         isExhausted = true;
         stamina = 0f;
         NoticeText.ntxt.NoticeChaserExhausted();
+        if (isTutorial && !tutorialBox8)
+        {
+            tutorialBox.SetActive(true);
+            Manager.manager.OpenMsgBox();
+            tutorialBox8 = true;
+        }
         yield return new WaitForSeconds(4f);
         isExhausted = false;
     }

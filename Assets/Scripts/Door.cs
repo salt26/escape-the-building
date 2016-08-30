@@ -157,4 +157,21 @@ public class Door : MonoBehaviour {
         audioSource.clip = doorUnlock;
         audioSource.Play();
 	}
+
+    // 튜토리얼용 함수
+    public void UnlockTutorial()
+    {
+        isLocked = false;
+        NoticeText.ntxt.NoticeTutorialUnlockDoor();
+        audioSource.clip = doorUnlock;
+        audioSource.Play();
+    }
+
+    public void UnlockTutorial2()
+    {
+        isLocked = false;
+        NoticeText.ntxt.NoticeTutorialUnlockDoor2();
+        audioSource.clip = doorUnlock;
+        audioSource.Play();
+    }
 }

@@ -14,8 +14,18 @@ public class Manager : MonoBehaviour {
     static public Manager manager;
 
     public GameObject startPanel;
+    public GameObject menuPanel;
+    public GameObject helpPanel;
+    public GameObject optionPanel;
+    public GameObject helpObjective;
+    public GameObject helpControl;
+    public GameObject helpChaser;
+    public GameObject helpCredit;
     public GameObject[] chasers;    // 여기 등록된 추적자만 공식적으로 사용 가능
     public AudioMixer BGMMixer;
+    public AudioSource buildings;
+    public AudioClip escapeBGM;
+    public GameObject escapeBox;
 
     private Animator gameOverAnim;
     bool isStart;
@@ -38,6 +48,53 @@ public class Manager : MonoBehaviour {
         gameOverAnim = GameObject.Find("GameOverPanel").GetComponent<Animator>();
     }
 
+    void Update()
+    {
+        if (isStart && Input.GetKeyDown(KeyCode.Escape))
+        {
+            MenuButton();
+        }
+        if (isGameOver)
+        {
+            Time.timeScale = 1f;
+            GetComponent<Move>().GetMouseLook().SetCursorLock(false);
+        }
+    }
+
+    public void MenuButton()
+    {
+        if (isStart && !menuPanel.activeInHierarchy)
+        {
+            menuPanel.SetActive(true);
+            helpPanel.SetActive(false);
+            optionPanel.SetActive(false);
+            Time.timeScale = 0f;
+            GetComponent<Move>().GetMouseLook().SetCursorLock(false);
+        }
+        else if (isStart)
+        {
+            menuPanel.SetActive(false);
+            helpPanel.SetActive(false);
+            optionPanel.SetActive(false);
+            Time.timeScale = 1f;
+            GetComponent<Move>().GetMouseLook().SetCursorLock(true);
+        }
+
+    }
+
+    public void HelpButton()
+    {
+        helpPanel.SetActive(true);
+        menuPanel.SetActive(false);
+        HelpObjective();
+    }
+
+    public void OptionButton()
+    {
+        optionPanel.SetActive(true);
+        menuPanel.SetActive(false);
+    }
+
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -45,24 +102,84 @@ public class Manager : MonoBehaviour {
 
     public void QuitGame()
     {
-#if UNITY_EDITOR
-        EditorApplication.isPlaying = false;
-#else 
-		Application.Quit();
-#endif
+        SceneManager.LoadScene("Main");
     }
 
-    public void BGMOn()
+    public void HelpObjective()
     {
-        Toggle toggle = GameObject.Find("Toggle").GetComponent<Toggle>();
-        if (toggle.isOn)
-        {
-            BGMMixer.SetFloat("BGM", 0f);
-        }
-        else
-        {
-            BGMMixer.SetFloat("BGM", -80f);
-        }
+        helpObjective.SetActive(true);
+        helpControl.SetActive(false);
+        helpChaser.SetActive(false);
+        helpCredit.SetActive(false);
+    }
+
+    public void HelpControl()
+    {
+        helpObjective.SetActive(false);
+        helpControl.SetActive(true);
+        helpChaser.SetActive(false);
+        helpCredit.SetActive(false);
+    }
+
+    public void HelpChaser()
+    {
+        helpObjective.SetActive(false);
+        helpControl.SetActive(false);
+        helpChaser.SetActive(true);
+        helpCredit.SetActive(false);
+    }
+
+    public void HelpCredit()
+    {
+        helpObjective.SetActive(false);
+        helpControl.SetActive(false);
+        helpChaser.SetActive(false);
+        helpCredit.SetActive(true);
+    }
+
+    public void SetMasterVol(float masterVol)
+    {
+        MainManager.mm.SetMasterVol(masterVol);
+    }
+
+    public void SetBGMVol(float bgmVol)
+    {
+        MainManager.mm.SetBGMVol(bgmVol);
+    }
+
+    public void SetSFXVol(float sfxVol)
+    {
+        MainManager.mm.SetSFXVol(sfxVol);
+    }
+
+    public void ToggleMaster(bool toggle)
+    {
+        MainManager.mm.ToggleMaster(toggle);
+    }
+
+    public void ToggleBGM(bool toggle)
+    {
+        MainManager.mm.ToggleBGM(toggle);
+    }
+
+    public void ToggleSFX(bool toggle)
+    {
+        MainManager.mm.ToggleSFX(toggle);
+    }
+
+    public void SetSensitivity(float sensitivity)
+    {
+        MainManager.mm.SetSensitivity(sensitivity);
+    }
+
+    public void SetHeadBob(bool headBob)
+    {
+        MainManager.mm.SetHeadBob(headBob);
+    }
+
+    public void ResetOptions()
+    {
+        MainManager.mm.ResetOptions();
     }
 
     public void GameStart() {
@@ -72,17 +189,41 @@ public class Manager : MonoBehaviour {
         isStart = true;
     }
 
+    public void OpenMsgBox()
+    {
+        isStart = false;
+        Time.timeScale = 0f;
+        GetComponent<Move>().GetMouseLook().SetCursorLock(false);
+    }
+
+    public void CloseMsgBox()
+    {
+        isStart = true;
+        Time.timeScale = 1f;
+        GetComponent<Move>().GetMouseLook().SetCursorLock(true);
+    }
+
     public bool IsStart()
     {
         return isStart;
     }
 
+    public void SetIsStart(bool start)
+    {
+        isStart = start;
+    }
+
     public void SetHasEscaped()
     {
-        StateText.stxt.SuccessToEscape();
         NoticeText.ntxt.NoticeEscaped();
         gameOverAnim.SetTrigger("successToEscape");
         hasEscaped = true;
+        if (SceneManager.GetActiveScene().name == "5.Building")
+        {
+            buildings.clip = escapeBGM;
+            buildings.Play();
+            StartCoroutine("EscapeUniversity");
+        }
     }
 
     public bool GetHasEscaped()
@@ -98,5 +239,27 @@ public class Manager : MonoBehaviour {
     public bool GetIsGameOver()
     {
         return isGameOver;
+    }
+
+    public void LoadTutorial2()
+    {
+        SceneManager.LoadScene("TrainingRoom2");
+    }
+
+    public void LoadTutorial3()
+    {
+        SceneManager.LoadScene("TrainingRoom3");
+    }
+
+    public void LoadTutorial4()
+    {
+        SceneManager.LoadScene("TrainingRoom4");
+    }
+
+    IEnumerator EscapeUniversity()
+    {
+        yield return new WaitForSeconds(3f);
+        escapeBox.SetActive(true);
+        OpenMsgBox();
     }
 }
