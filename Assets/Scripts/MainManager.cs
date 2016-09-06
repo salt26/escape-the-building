@@ -55,9 +55,29 @@ public class MainManager : MonoBehaviour {
         ReturnToMainButton();
     }
 
+    /*
     void OnLevelWasLoaded(int level)
     {
         if (level == 0)
+        {
+            LoadMainScene();
+        }
+    }
+    */
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnLevelFinishedLoading;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+    }
+
+    void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.buildIndex == 0)
         {
             LoadMainScene();
         }

@@ -23,6 +23,10 @@ public class Door : MonoBehaviour {
     public AudioClip doorUnlock;
     public AudioClip doorCreaking;
 
+    float openTime;
+    //Vector3 initialPosition;
+    //Quaternion initialRotation;
+
 	Transform player;
     Transform thisDoor;
     NavMeshObstacle obstacle;
@@ -34,9 +38,12 @@ public class Door : MonoBehaviour {
         player = GameObject.Find("Player").GetComponent<Transform>();
         inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
         thisDoor = GetComponent<Transform>();
+        //initialPosition = thisDoor.localPosition;
+        //initialRotation = thisDoor.localRotation;
         audioSource = GetComponent<AudioSource>();
         obstacle = GetComponent<NavMeshObstacle>();
         obstacle.enabled = false;
+        openTime = 0f;
     }
 
 	void FixedUpdate () {
@@ -80,7 +87,7 @@ public class Door : MonoBehaviour {
         if (Input.GetMouseButton(0) && isSameFloor(player.position, thisDoor.position) && isNearEnough(player.position, thisDoor.position, 2f) &&
             !isLocked && !player.GetComponent<Move>().isExhausted && !player.GetComponent<Move>().isCaptured)
         {
-            Open(10f);
+            openTime = 2f;
             if (!audioSource.isPlaying)
             {
                 audioSource.clip = doorCreaking;
@@ -93,13 +100,24 @@ public class Door : MonoBehaviour {
                 isNearEnough(chaser.GetComponent<Transform>().position, thisDoor.position, chaser.GetComponent<AutoMove>().doorDistance) &&
             !isLocked && !chaser.GetComponent<AutoMove>().isExhausted)
             {
-                Open(10f);
+                openTime = 2f;
                 if (!audioSource.isPlaying)
                 {
                     audioSource.clip = doorCreaking;
                     audioSource.Play();
                 }
             }
+        }
+
+        // 남은 openTime(초)만큼 문을 여는 방향으로 힘을 가한다.
+        if (openTime > 0f)
+        {
+            Open(10f);
+            openTime -= Time.fixedDeltaTime;
+        }
+        else if (openTime < 0f)
+        {
+            openTime = 0f;
         }
 	}
 

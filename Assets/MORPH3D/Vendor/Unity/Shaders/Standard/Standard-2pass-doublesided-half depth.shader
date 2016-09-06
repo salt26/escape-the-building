@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
 Shader "Morph3D/Standard-2pass-double sided half depth"
 {
 	Properties
@@ -96,7 +98,7 @@ Shader "Morph3D/Standard-2pass-double sided half depth"
 				VertexOutputForwardBase o;
 				UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBase, o);
 
-				float4 posWorld = mul(_Object2World, v.vertex);
+				float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
 				#if UNITY_SPECCUBE_BOX_PROJECTION
 					o.posWorld = posWorld.xyz;
 				#endif
@@ -226,7 +228,7 @@ Shader "Morph3D/Standard-2pass-double sided half depth"
 				VertexOutputForwardBase o;
 				UNITY_INITIALIZE_OUTPUT(VertexOutputForwardBase, o);
 
-				float4 posWorld = mul(_Object2World, v.vertex);
+				float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
 				#if UNITY_SPECCUBE_BOX_PROJECTION
 					o.posWorld = posWorld.xyz;
 				#endif

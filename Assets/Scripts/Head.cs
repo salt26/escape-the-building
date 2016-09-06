@@ -33,7 +33,7 @@ public class Head : MonoBehaviour {
         // 발을 디디는 순간(머리가 가장 아래로 내려갔다 올라오는 순간) 발걸음 소리를 재생함.
         if (Move.move.isMoving && Move.move.character.isGrounded)
         {
-            if (MainManager.mm.useHeadBob)
+            if (MainManager.mm != null && MainManager.mm.useHeadBob)
             {
                 float oldY = sight.transform.localPosition.y;
                 float oldGradient = gradient;
