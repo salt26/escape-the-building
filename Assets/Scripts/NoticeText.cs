@@ -10,6 +10,7 @@ public class NoticeText : MonoBehaviour {
     int whichCoroutineWorks;
 
     int mapID;
+    int doorID;
 
     Text text;
 
@@ -25,26 +26,27 @@ public class NoticeText : MonoBehaviour {
         whichCoroutineStarts = 0;
         whichCoroutineWorks = 0;
         mapID = 0;
+        doorID = 0;
         text.text = "";
 
 	}
 	
 	void FixedUpdate () {
         
-        if (whichCoroutineStarts == 1 && whichCoroutineWorks != 1)
+        if (whichCoroutineStarts == 1 && whichCoroutineWorks != 10000 + doorID && doorID != 0)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(1, "문이 잠긴 듯하다."));
+            StartCoroutine(NoticeMessage(10000 + doorID, "문이 잠긴 듯하다."));
         }
-        else if (whichCoroutineStarts == 2 && whichCoroutineWorks != 2)
+        else if (whichCoroutineStarts == 2 && whichCoroutineWorks != 20000 + doorID && doorID != 0)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(2, "이 문은 가지고 있는 열쇠들로 열리지 않는다."));
+            StartCoroutine(NoticeMessage(20000 + doorID, "이 문은 가지고 있는 열쇠들로 열리지 않는다."));
         }
-        else if (whichCoroutineStarts == 3 && whichCoroutineWorks != 3)
+        else if (whichCoroutineStarts == 3 && whichCoroutineWorks != 30000 + doorID && doorID != 0)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(3, "어, 가지고 있던 열쇠로 문이 열렸다!"));
+            StartCoroutine(NoticeMessage(30000 + doorID, "어, 가지고 있던 열쇠로 문이 열렸다!"));
         }
         else if (whichCoroutineStarts == 4 && whichCoroutineWorks != 4)
         {
@@ -54,7 +56,9 @@ public class NoticeText : MonoBehaviour {
         else if (whichCoroutineStarts == 5 && whichCoroutineWorks != 5)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(5, "드디어 출입문을 여는 열쇠를 찾았다!"));
+            int r = Random.Range(0, 2);
+            if (r == 0) StartCoroutine(NoticeMessage(5, "드디어 출입문을 여는 열쇠를 찾았다!"));
+            else if (r == 1) StartCoroutine(NoticeMessage(5, "황금색 열쇠 획득! 열쇠에 맞는 출입문을 찾아보자."));
         }
         else if (whichCoroutineStarts == 6 && whichCoroutineWorks != 6)
         {
@@ -92,50 +96,53 @@ public class NoticeText : MonoBehaviour {
             if (r == 0) StartCoroutine(NoticeMessage(11, "추적자가 바로 앞까지 쫓아왔어!"));
             else if (r == 1) StartCoroutine(NoticeMessage(11, "앗, 위험하다!"));
         }
-        else if (whichCoroutineStarts == 12 && whichCoroutineWorks != 12)
+        else if (whichCoroutineStarts == 12 && whichCoroutineWorks != 120000 + doorID && doorID != 0)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(12, "밖으로 통하는 문이지만, 잠긴 듯하다."));
+            StartCoroutine(NoticeMessage(120000 + doorID, "밖으로 통하는 문이지만, 잠긴 듯하다."));
         }
-        else if (whichCoroutineStarts == 13 && whichCoroutineWorks != 13)
+        else if (whichCoroutineStarts == 13 && whichCoroutineWorks != 130000 + doorID && doorID != 0)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(13, "이 출입문은 가지고 있는 열쇠들로 열리지 않는다."));
+            StartCoroutine(NoticeMessage(130000 + doorID, "이 출입문은 가지고 있는 열쇠들로 열리지 않는다."));
         }
         else if (whichCoroutineStarts == 14 && whichCoroutineWorks != 14)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(14, "쓰러질 듯 힘들지만 문을 열었어! 문을 열고 나가자."));
+            StartCoroutine(NoticeMessage(14, "쓰러질 듯 힘들지만 문이 열렸어! 문을 열고 나가자."));
         }
         else if (whichCoroutineStarts == 15 && whichCoroutineWorks != 15)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(15, "50초가 지나 문이 열렸다! 문을 열고 나가자."));
+            StartCoroutine(NoticeMessage(15, "추적자를 따돌려 문이 열렸다! 문을 열고 계단으로 나가자."));
         }
         else if (whichCoroutineStarts == 16 && whichCoroutineWorks != 16)
         {
             StopAllCoroutines();
             StartCoroutine(NoticeMessage(16, "이곳의 지도는 가지고 있지 않다."));
         }
-        else if (whichCoroutineStarts == 17 && whichCoroutineWorks != 17 && mapID != 0)
+        else if (whichCoroutineStarts == 17 && whichCoroutineWorks != 170000 + mapID && mapID != 0)
         {
             StopAllCoroutines();
-            StartCoroutine(NoticeMessage(17, "여기는 " + (mapID / 1000) + "동 건물의 " + ((mapID / 100) % 10) + "층이다."));
+            StartCoroutine(NoticeMessage(170000 + mapID, "여기는 " + (mapID / 1000) + "동 건물의 " + ((mapID / 100) % 10) + "층이다."));
         }
 	}
 
-    public void NoticeLockedDoor()
+    public void NoticeLockedDoor(int door)
     {
+        doorID = door;
         whichCoroutineStarts = 1;
     }
 
-    public void NoticeFailedToUnlock()
+    public void NoticeFailedToUnlock(int door)
     {
+        doorID = door;
         whichCoroutineStarts = 2;
     }
 
-    public void NoticeSuccessedToUnlock()
+    public void NoticeSuccessedToUnlock(int door)
     {
+        doorID = door;
         whichCoroutineStarts = 3;
     }
 
@@ -179,13 +186,15 @@ public class NoticeText : MonoBehaviour {
         whichCoroutineStarts = 11;
     }
 
-    public void NoticeLockedEntranceDoor()
+    public void NoticeLockedEntranceDoor(int door)
     {
+        doorID = door;
         whichCoroutineStarts = 12;
     }
 
-    public void NoticeFailedToUnlockEntrance()
+    public void NoticeFailedToUnlockEntrance(int door)
     {
+        doorID = door;
         whichCoroutineStarts = 13;
     }
 

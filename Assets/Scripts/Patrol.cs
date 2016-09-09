@@ -94,9 +94,10 @@ public class Patrol : MonoBehaviour {
                 destLocation = playerLocation.GetComponent<Location>();
 
                 // 튜토리얼에서 주인공을 목격하면
-                if (isTutorial && !tutorialBox4)
+                if (isTutorial && !tutorialBox4 && Manager.manager.GetIsStart())
                 {
                     tutorialBoxes[0].SetActive(true);
+                    StateText.stxt.T4FleeFromChaser();
                     Manager.manager.OpenMsgBox();
                     tutorialBox4 = true;
                 }
@@ -143,12 +144,14 @@ public class Patrol : MonoBehaviour {
                 //Debug.Log("moveState = " + moveState);
                 nextLocation = NextDestLocation(passedLocation, null);          // 마지막으로 지난 지점을 기준으로 순찰 경로에 합류
 
-                // 튜토리얼에서 추적자를 따돌린 경우
-                if (isTutorial && !tutorialBox7 && !isNearEnough(target, chaser.position, 5f))
+                // 튜토리얼에서 추적자를 따돌린 경우 중앙의 문이 열림
+                if (isTutorial && !tutorialBox7 && !isNearEnough(target, chaser.position, 5f) && Manager.manager.GetIsStart())
                 {
                     tutorialBoxes[2].SetActive(true);
+                    StateText.stxt.T4Escape();
                     Manager.manager.OpenMsgBox();
                     tutorialBox7 = true;
+                    Open4221Door();
                 }
             }
             destLocation = nextLocation;
@@ -185,7 +188,8 @@ public class Patrol : MonoBehaviour {
         }
 
         // 튜토리얼에서 같은 방 안에서 주인공을 발견하면
-        if (isTutorial && Move.move.GetTempZoneID() == GetTempZoneID() && tempZoneID != 0 && (GetTempZoneID() % 100) < 17 && !tutorialBox5) {
+        if (isTutorial && Move.move.GetTempZoneID() == GetTempZoneID() && tempZoneID != 0
+            && (GetTempZoneID() % 100) < 17 && !tutorialBox5 && Manager.manager.GetIsStart()) {
             tutorialBoxes[1].SetActive(true);
             Manager.manager.OpenMsgBox();
             tutorialBox5 = true;
@@ -341,5 +345,11 @@ public class Patrol : MonoBehaviour {
     public void SetTempZoneID(int ID)
     {
         tempZoneID = ID;
+    }
+
+    // 튜토리얼용 함수
+    void Open4221Door()
+    {
+        GameObject.Find("DoorR4221").GetComponentInChildren<Door>().UnlockTutorial2();
     }
 }

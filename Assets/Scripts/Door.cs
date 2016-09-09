@@ -24,8 +24,9 @@ public class Door : MonoBehaviour {
     public AudioClip doorCreaking;
 
     float openTime;
-    //Vector3 initialPosition;
-    //Quaternion initialRotation;
+    float forceTime;
+    Vector3 initialPosition;
+    Quaternion initialRotation;
 
 	Transform player;
     Transform thisDoor;
@@ -38,12 +39,13 @@ public class Door : MonoBehaviour {
         player = GameObject.Find("Player").GetComponent<Transform>();
         inventory = GameObject.Find("Player").GetComponent<KeyInventory>();
         thisDoor = GetComponent<Transform>();
-        //initialPosition = thisDoor.localPosition;
-        //initialRotation = thisDoor.localRotation;
+        initialPosition = thisDoor.localPosition;
+        initialRotation = thisDoor.localRotation;
         audioSource = GetComponent<AudioSource>();
         obstacle = GetComponent<NavMeshObstacle>();
         obstacle.enabled = false;
         openTime = 0f;
+        forceTime = 0f;
     }
 
 	void FixedUpdate () {
@@ -60,8 +62,8 @@ public class Door : MonoBehaviour {
 
                 if (inventory.NumberOfNotUsedKey(isEntranceType) == 0)
                 {
-                    if (!isEntranceType) NoticeText.ntxt.NoticeLockedDoor();
-                    else NoticeText.ntxt.NoticeLockedEntranceDoor();
+                    if (!isEntranceType) NoticeText.ntxt.NoticeLockedDoor(GetDoorID());
+                    else NoticeText.ntxt.NoticeLockedEntranceDoor(GetDoorID());
                     haveNoKey = true;
                 }
 
@@ -73,8 +75,8 @@ public class Door : MonoBehaviour {
                     if (!haveNoKey)
                     {
                         //Debug.Log("Fail to open"); // 여는 데에 실패하면 주는 피드백 구현하기
-                        if (!isEntranceType) NoticeText.ntxt.NoticeFailedToUnlock();
-                        else NoticeText.ntxt.NoticeFailedToUnlockEntrance();
+                        if (!isEntranceType) NoticeText.ntxt.NoticeFailedToUnlock(GetDoorID());
+                        else NoticeText.ntxt.NoticeFailedToUnlockEntrance(GetDoorID());
                     }
                     return;
                 }
@@ -108,16 +110,30 @@ public class Door : MonoBehaviour {
                 }
             }
         }
-
+        
         // 남은 openTime(초)만큼 문을 여는 방향으로 힘을 가한다.
         if (openTime > 0f)
         {
             Open(10f);
             openTime -= Time.fixedDeltaTime;
+            forceTime += Time.fixedDeltaTime;
         }
         else if (openTime < 0f)
         {
             openTime = 0f;
+            forceTime = 0f;
+        }
+        else
+        {
+            forceTime = 0f;
+        }
+        
+        if(forceTime >= 2f && ((thisDoor.localRotation.eulerAngles.y > -70f && thisDoor.localRotation.eulerAngles.y < 70f)
+            || (thisDoor.localRotation.eulerAngles.y > 290f)))
+        {
+            //Debug.Log("Door" + doorID + " is repaired from rotation y " + thisDoor.localRotation.eulerAngles.y + ".");
+            thisDoor.localRotation = initialRotation;
+            thisDoor.localPosition = initialPosition;
         }
 	}
 
@@ -171,7 +187,7 @@ public class Door : MonoBehaviour {
 		isLocked = false;
 		obstacle.enabled = false;
         //Debug.Log("Success to open"); // 여는 데에 성공하면 주는 피드백 구현하기
-        NoticeText.ntxt.NoticeSuccessedToUnlock();
+        NoticeText.ntxt.NoticeSuccessedToUnlock(GetDoorID());
         audioSource.clip = doorUnlock;
         audioSource.Play();
 	}

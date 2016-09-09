@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 
 public class TutorialTime : MonoBehaviour {
-
+    /*
     public GameObject tutorialBox;
     float remainTime;
     bool openDoor;
@@ -32,10 +32,6 @@ public class TutorialTime : MonoBehaviour {
             GetComponent<Text>().text = "문이 열렸습니다.";
         }
 	}
-
-    // 튜토리얼용 함수
-    void Open4221Door()
-    {
-        GameObject.Find("DoorR4221").GetComponentInChildren<Door>().UnlockTutorial2();
-    }
+    */
+    
 }

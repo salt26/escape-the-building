@@ -29,6 +29,7 @@ public class Move : MonoBehaviour {
     int tempZoneID;                             // 주인공이 현재 머물러 있는 AudioZone의 ID
     bool isTutorial;
     bool isTutorial4;
+    bool tutorialBox_;
     bool tutorialBox6_;
     Vector3 movement;
     Camera head;
@@ -49,6 +50,7 @@ public class Move : MonoBehaviour {
         isCaptured = false;
         isExhausted = false;
         isTutorial = false;
+        tutorialBox_ = false;
         tutorialBox6_ = false;
         if (SceneManager.GetActiveScene().name == "TrainingRoom4") isTutorial4 = true;
         else isTutorial4 = false;
@@ -127,7 +129,7 @@ public class Move : MonoBehaviour {
             sliderFill.color = new Color(1f, (stamina / maxStamina) * 2f + 0.28f, (stamina / maxStamina) * 2f + 0.28f, 0.75f);
 
             // 튜토리얼용 코드
-            if (isTutorial4 && !tutorialBox6_)
+            if (isTutorial4 && !tutorialBox6_ && Manager.manager.GetIsStart())
             {
                 tutorialBox6.SetActive(true);
                 Manager.manager.OpenMsgBox();
@@ -169,11 +171,13 @@ public class Move : MonoBehaviour {
         stamina = 0f;
         gameOverAnim.SetTrigger("exhaustion");
         NoticeText.ntxt.NoticePlayerExhausted();
-        if (isTutorial)
+        if (isTutorial && !tutorialBox_ && Manager.manager.GetIsStart())
         {
             tutorialBox.SetActive(true);
+            StateText.stxt.T1OpenDoor();
             Manager.manager.OpenMsgBox();
             Open1101Door();
+            tutorialBox_ = true;
         }
         yield return new WaitForSeconds(4f);
         gameOverAnim.SetTrigger("recoverFromExhaustion");
@@ -247,5 +251,11 @@ public class Move : MonoBehaviour {
     void Open1101Door()
     {
         GameObject.Find("DoorL1101").GetComponentInChildren<Door>().UnlockTutorial();
+    }
+
+    // 튜토리얼용 함수
+    public bool GetTutorialBox_()
+    {
+        return tutorialBox_;
     }
 }

@@ -73,16 +73,16 @@ public class Head : MonoBehaviour {
         // 체력이 낮으면 숨소리를 낸다.
         if (Move.move.isExhausted && !audioSource.isPlaying)
         {
-            PlayBreathAudio(0.85f);
+            PlayBreathAudio(0.7f);
         }
         else if (Move.move.GetStamina() / Move.move.maxStamina < 0.16f && Move.move.isRunning && !audioSource.isPlaying)
         {
-            PlayBreathAudio(0.6f);
+            PlayBreathAudio(0.45f);
         }
         else if (((Move.move.GetStamina() / Move.move.maxStamina < 0.33f && Move.move.isRunning) ||
             (Move.move.GetStamina() / Move.move.maxStamina < 0.16f && !Move.move.isRunning)) && !audioSource.isPlaying)
         {
-            PlayBreathAudio(0.25f);
+            PlayBreathAudio(0.2f);
         }
     }
 

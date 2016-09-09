@@ -36,6 +36,7 @@ public class Capture : MonoBehaviour {
     IEnumerator OpenDeadMsgBox()
     {
         yield return new WaitForSeconds(2f);
+        Manager.manager.CloseMenu();
         msgBox.SetActive(true);
         Manager.manager.OpenMsgBox();
     }

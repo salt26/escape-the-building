@@ -21,7 +21,12 @@ public class Manager : MonoBehaviour {
     public GameObject helpControl;
     public GameObject helpChaser;
     public GameObject helpCredit;
-    public GameObject[] chasers;    // 여기 등록된 추적자만 공식적으로 사용 가능
+    public GameObject helpPanel_;       // _가 붙은 변수와 함수들은 시작 시 띄워주는 도움말과 관계가 있음.
+    public GameObject helpObjective_;
+    public GameObject helpControl_;
+    public GameObject helpChaser_;
+    public GameObject helpCredit_;
+    public GameObject[] chasers;        // 여기 등록된 추적자만 공식적으로 사용 가능
     public AudioMixer BGMMixer;
     public AudioSource buildings;
     public AudioClip escapeBGM;
@@ -82,11 +87,27 @@ public class Manager : MonoBehaviour {
 
     }
 
+    public void CloseMenu()
+    {
+        menuPanel.SetActive(false);
+        helpPanel.SetActive(false);
+        optionPanel.SetActive(false);
+        Time.timeScale = 1f;
+        GetComponent<Move>().GetMouseLook().SetCursorLock(true);
+    }
+
     public void HelpButton()
     {
         helpPanel.SetActive(true);
         menuPanel.SetActive(false);
         HelpObjective();
+    }
+
+    public void HelpButton_()
+    {
+        helpPanel_.SetActive(true);
+        startPanel.SetActive(false);
+        HelpObjective_();
     }
 
     public void OptionButton()
@@ -137,6 +158,38 @@ public class Manager : MonoBehaviour {
         helpCredit.SetActive(true);
     }
 
+    public void HelpObjective_()
+    {
+        helpObjective_.SetActive(true);
+        helpControl_.SetActive(false);
+        helpChaser_.SetActive(false);
+        helpCredit_.SetActive(false);
+    }
+
+    public void HelpControl_()
+    {
+        helpObjective_.SetActive(false);
+        helpControl_.SetActive(true);
+        helpChaser_.SetActive(false);
+        helpCredit_.SetActive(false);
+    }
+
+    public void HelpChaser_()
+    {
+        helpObjective_.SetActive(false);
+        helpControl_.SetActive(false);
+        helpChaser_.SetActive(true);
+        helpCredit_.SetActive(false);
+    }
+
+    public void HelpCredit_()
+    {
+        helpObjective_.SetActive(false);
+        helpControl_.SetActive(false);
+        helpChaser_.SetActive(false);
+        helpCredit_.SetActive(true);
+    }
+
     public void SetMasterVol(float masterVol)
     {
         MainManager.mm.SetMasterVol(masterVol);
@@ -185,6 +238,7 @@ public class Manager : MonoBehaviour {
     public void GameStart() {
         Time.timeScale = 1f;
         startPanel.SetActive(false);
+        helpPanel_.SetActive(false);
         GetComponent<Move>().GetMouseLook().SetCursorLock(true);
         isStart = true;
     }
@@ -203,7 +257,7 @@ public class Manager : MonoBehaviour {
         GetComponent<Move>().GetMouseLook().SetCursorLock(true);
     }
 
-    public bool IsStart()
+    public bool GetIsStart()
     {
         return isStart;
     }
@@ -259,6 +313,7 @@ public class Manager : MonoBehaviour {
     IEnumerator EscapeUniversity()
     {
         yield return new WaitForSeconds(3f);
+        CloseMenu();
         escapeBox.SetActive(true);
         OpenMsgBox();
     }

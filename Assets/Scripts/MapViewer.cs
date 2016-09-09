@@ -11,7 +11,7 @@ public class MapViewer : MonoBehaviour {
 	void FixedUpdate () {
         if (Input.GetKey(KeyCode.Space))
         {
-            if (SceneManager.GetActiveScene().name != "5.Building")
+            if (SceneManager.GetActiveScene().name != "TrainingRoom4" && SceneManager.GetActiveScene().name != "5.Building")
             {
                 NoticeText.ntxt.NoticeMapInvalid();
                 return;
@@ -107,7 +107,7 @@ public class MapViewer : MonoBehaviour {
                 mapImages.SetActive(true);
                 NoticeText.ntxt.NoticeMap(Move.move.GetTempZoneID());
             }
-            else if (Move.move.GetTempZoneID() / 100 == 42)
+            else if (Move.move.GetTempZoneID() / 100 == 42 && SceneManager.GetActiveScene().name == "5.Building")
             {
                 SetAllMapInactive();
                 maps[13].SetActive(true);
@@ -148,6 +148,12 @@ public class MapViewer : MonoBehaviour {
                 maps[18].SetActive(true);
                 mapImages.SetActive(true);
                 NoticeText.ntxt.NoticeMap(Move.move.GetTempZoneID());
+            }
+            else if (Move.move.GetTempZoneID() / 100 == 42 && SceneManager.GetActiveScene().name == "TrainingRoom4")
+            {
+                SetAllMapInactive();
+                maps[0].SetActive(true);
+                mapImages.SetActive(true);
             }
             else
             {
